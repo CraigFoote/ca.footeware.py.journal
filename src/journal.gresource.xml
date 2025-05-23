@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+  <gresource prefix="/ca/footeware/py/journal/">
+    <file preprocess="xml-stripblanks">window.ui</file>
+    <file preprocess="xml-stripblanks">gtk/help-overlay.ui</file>
+    <file preprocess="xml-stripblanks" alias="icons/first-symbolic.svg">../data/icons/hicolor/symbolic/actions/first-symbolic.svg</file>
+    <file preprocess="xml-stripblanks" alias="icons/left-symbolic.svg">../data/icons/hicolor/symbolic/actions/left-symbolic.svg</file>
+    <file preprocess="xml-stripblanks" alias="icons/right-symbolic.svg">../data/icons/hicolor/symbolic/actions/right-symbolic.svg</file>
+    <file preprocess="xml-stripblanks" alias="icons/last-symbolic.svg">../data/icons/hicolor/symbolic/actions/last-symbolic.svg</file>
+    <file preprocess="xml-stripblanks" alias="icons/today-symbolic.svg">../data/icons/hicolor/symbolic/actions/today-symbolic.svg</file>
+  </gresource>
+</gresources>
+

@@ -1,0 +1,3 @@
+[D-BUS Service]
+Name=ca.footeware.py.journal
+Exec=@bindir@/journal --gapplication-service

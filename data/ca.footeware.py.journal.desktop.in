@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=journal
+Exec=journal
+Icon=ca.footeware.py.journal
+Terminal=false
+Type=Application
+Categories=Utility;
+Keywords=GTK;
+StartupNotify=true
+DBusActivatable=true
