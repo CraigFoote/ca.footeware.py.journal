@@ -22,6 +22,7 @@ from gi.repository import Gtk
 from gi.repository import Gio
 from gi.repository import GLib
 import jprops
+import collections
 import os
 import gi
 gi.require_version('Gtk', '4.0')
@@ -238,15 +239,66 @@ class JournalWindow(Adw.ApplicationWindow):
 
     def on_day_selected(self, calendar):
         """React to a new day being selected in the calendar."""
+        # store date from previous selection, we may need to save its entry
+        self.old_date = self.date
         self.date = calendar.get_date()
         date_str = self.date.format('%Y-%m-%d')
+        if self.window_title.get_title().startswith("• "):
+            dialog = Adw.MessageDialog(
+                transient_for=self,
+                modal=True,
+                heading="Save changes?",
+            )
+            file_name = os.path.basename(self.file_path)
+            dialog.set_body(f'The editor has unsaved changes. Do you want to save them?')
+            dialog.add_response("discard", "Discard")
+            dialog.add_response("save", "Save")
+            dialog.set_default_response("save")
+            dialog.set_close_response("save")
+            dialog.set_response_appearance("discard", Adw.ResponseAppearance.DESTRUCTIVE)
+            dialog.set_response_appearance("save", Adw.ResponseAppearance.SUGGESTED)
+            dialog.connect("response", self.on_save_journal_dialog_response)
+            dialog.show()
+        else:
+            if date_str in self.properties:
+                journal_entry = self.properties[date_str]
+                self.textview.get_buffer().set_text(journal_entry)
+            else:
+                # key not found; date not in journal, clear editor
+                self.textview.get_buffer().set_text('')
+
+
+    def on_save_journal_dialog_response(self, dialog, response):
+        """Respond to request to save current-1 journal entry."""
+        date_str = self.date.format('%Y-%m-%d')
         buffer = self.textview.get_buffer()
-        try:
+        if response == "save":
+            # update self.properties entry and save to file
+            journal_entry = buffer.get_text(buffer.get_start_iter(), buffer.get_end_iter(), True)
+            self.properties[self.old_date.format('%Y-%m-%d')] = journal_entry
+            # create file for writing, 'w' means to overwrite & write whole file
+            with open(self.file_path, 'w+t', encoding='UTF-8') as file:
+                self.delete_empty_entries()
+                jprops.store_properties(file, self.properties)
+                self.mark_calendar_days()
+                self.show_toast("Journal saved.")
+        if date_str in self.properties:
             journal_entry = self.properties[date_str]
             buffer.set_text(journal_entry)
-        except KeyError as e:
-            # key not found; date not in journal, clear editor
+        else:
             buffer.set_text('')
+        buffer.set_modified(False)
+        self.add_title_prefix(False)
+
+
+    def delete_empty_entries(self):
+        """Remove any entries in self.properties that have an empty value."""
+        keys_to_delete = []
+        for key, value in self.properties.items():
+            if value == '':
+                keys_to_delete.append(key)
+        for key in keys_to_delete:
+            self.properties.pop(key)
 
 
     def on_new_browse_for_folder_action(self, action, parameters=None):
@@ -315,12 +367,13 @@ class JournalWindow(Adw.ApplicationWindow):
     def on_create_journal_dialog_complete(self, file_path, file):
         """Complete journal creation process by enabling widgets,
         setting subtitle and setting focus in textview."""
-        jprops.store_properties(file, {})
+        jprops.store_properties(file, self.properties)
         self.enable_widgets(True)
         self.textview.grab_focus()
         # clear textview
         self.textview.get_buffer().set_text('')
-        self.window_title.set_subtitle(file_path)
+        self.textview.get_buffer().set_modified(False)
+        self.window_title.set_subtitle(self.file_path)
         self.show_toast("New journal created.")
 
 
@@ -332,12 +385,8 @@ class JournalWindow(Adw.ApplicationWindow):
 
     def on_file_select(self, dialog, result):
         """Respond to a file being selected in Open dialog."""
-        try:
-            file, encoding = dialog.open_text_file_finish(result)
-            self.existing_journal_location.set_text(file.get_path())
-        except Gtk.DialogError:
-            # user cancelled or backend error
-            pass
+        file, encoding = dialog.open_text_file_finish(result)
+        self.existing_journal_location.set_text(file.get_path())
 
 
     def on_open_journal_action(self, action, parameters=None):
@@ -347,32 +396,33 @@ class JournalWindow(Adw.ApplicationWindow):
         file_path = self.existing_journal_location.get_text()
         password = self.existing_journal_password.get_text()
         if file_path != '' and password != '':
-                try:
-                    with open(file_path, 'a+t', encoding='UTF-8') as file:
-                        file.seek(0) # reset cursor
-                        self.properties = jprops.load_properties(file)
-                        self.mark_calendar_days()
-                        self.file_path = file_path
-                        self.enable_widgets(True)
-                        self.textview.grab_focus()
-                        # load today's journal entry if exists
-                        date_str = self.date.format('%Y-%m-%d')
-                        journal_entry = self.properties[date_str]
-                        self.textview.get_buffer().set_text(journal_entry)
-                        self.window_title.set_subtitle(file_path)
-                        self.show_toast("Journal opened.")
-                except UnicodeDecodeError as e:
-                    self.show_toast('Unable to open file.')
-                except KeyError as e:
-                    # no entry for today
-                    pass
+            try:
+                with open(file_path, 'a+t', encoding='UTF-8') as file:
+                    file.seek(0) # reset cursor
+                    self.properties = jprops.load_properties(file, collections.OrderedDict)
+                    self.mark_calendar_days()
+                    self.file_path = file_path
+                    self.enable_widgets(True)
+                    self.textview.grab_focus()
+                    # load today's journal entry if exists
+                    date_str = self.date.format('%Y-%m-%d')
+                    journal_entry = self.properties[date_str]
+                    self.textview.get_buffer().set_text(journal_entry)
+                    self.textview.get_buffer().set_modified(False)
+                    self.window_title.set_subtitle(file_path)
+                    self.show_toast("Journal opened.")
+            except UnicodeDecodeError as e:
+                self.show_toast('Unable to open file.')
+            except KeyError as e:
+                # no entry for to display for today
+                self.show_toast("Journal opened.")
 
 
     def mark_calendar_days(self):
         """Read the journal and mark the calendar days for the month that are keys."""
         self.calendar.clear_marks()
         for key, value in self.properties.items():
-            if self.date.get_year() == int(key[:4]) and self.date.get_month() == int(key[5:7]):
+            if self.date.get_year() == int(key[:4]) and self.date.get_month() == int(key[5:7]) and value != '':
                 self.calendar.mark_day(int(key[8:]))
 
 
@@ -385,6 +435,7 @@ class JournalWindow(Adw.ApplicationWindow):
             self.properties[date_str] = journal_entry
             if self.file_path:
                 with open(self.file_path, 'wt', encoding='UTF-8') as file:
+                    self.delete_empty_entries()
                     #TODO encrypt
                     jprops.store_properties(file, self.properties)
                     buffer.set_modified(False)
@@ -413,18 +464,22 @@ class JournalWindow(Adw.ApplicationWindow):
     def on_buffer_changed(self, buffer):
         """Handle text buffer change by prepending an asterisk to the title."""
         date_str = self.date.format('%Y-%m-%d')
-        try:
+        displayed_text = buffer.get_text(buffer.get_start_iter(), buffer.get_end_iter(), True)
+        if date_str in self.properties:
             journal_entry = self.properties[date_str]
-            displayed_text = buffer.get_text(buffer.get_start_iter(), buffer.get_end_iter(), True)
-            if displayed_text == '':
-                # occurs when loading new journal entry before setting text in editor
-                pass
-            elif displayed_text != journal_entry:
-                if buffer.get_modified() == True:
-                    title_str = self.window_title.get_title()
-                    if not title_str.startswith("• "):
-                        self.window_title.set_title(f"• {title_str}")
-        except KeyError as e:
-            # no entry for this date; empty buffer = not modified
-            pass
+            if displayed_text != journal_entry:
+                self.add_title_prefix(True)
+            else:
+                self.add_title_prefix(False)
+        else:
+            self.add_title_prefix(displayed_text != '')
 
+
+    def add_title_prefix(self, changed):
+        """Prefix the window title with a dot to indicate modified buffer."""
+        title_str = self.window_title.get_title()
+        if changed:
+            if not title_str.startswith('• '):
+                self.window_title.set_title(f'• {title_str}')
+        else:
+            self.window_title.set_title('Journal')

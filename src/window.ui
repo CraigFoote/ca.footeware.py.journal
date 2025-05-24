@@ -377,7 +377,7 @@
             <!-- 'Save' button -->
             <child>
               <object class="GtkButton" id="save_button">
-                <property name="label">Save Journal</property>
+                <property name="label">Save</property>
                 <property name="can_target">false</property>
                 <property name="halign">end</property>
                 <property name="action-name">win.save_journal</property>
