@@ -49,11 +49,7 @@
   <screenshots>
     <screenshot type="default">
       <image>https://github.com/CraigFoote/ca.footeware.py.journal/blob/master/data/screenshot.png?raw=true</image>
-      <caption>A caption</caption>
-    </screenshot>
-    <screenshot>
-      <image>https://example.org/example2.png</image>
-      <caption>A caption</caption>
+      <caption>Journal window</caption>
     </screenshot>
   </screenshots>
 
