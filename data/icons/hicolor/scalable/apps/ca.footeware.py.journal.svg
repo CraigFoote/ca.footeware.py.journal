@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Uploaded to: SVG Repo, www.svgrepo.com, Transformed by: SVG Repo Mixer Tools -->
 
 <svg
    fill="#000000"
@@ -14,34 +13,10 @@
    inkscape:version="1.4.2 (ebf0e940d0, 2025-05-08)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns="http://www.w3.org/2000/svg"
    xmlns:svg="http://www.w3.org/2000/svg">
   <defs
-     id="defs1">
-    <linearGradient
-       id="linearGradient1"
-       inkscape:collect="always">
-      <stop
-         style="stop-color:#63452c;stop-opacity:0;"
-         offset="0"
-         id="stop2" />
-      <stop
-         style="stop-color:#4b331c;stop-opacity:1;"
-         offset="0.10968708"
-         id="stop1" />
-    </linearGradient>
-    <linearGradient
-       inkscape:collect="always"
-       xlink:href="#linearGradient1"
-       id="linearGradient2"
-       x1="6.3686047"
-       y1="0.75284183"
-       x2="16.128639"
-       y2="14.186377"
-       gradientUnits="userSpaceOnUse"
-       spreadMethod="pad" />
-  </defs>
+     id="defs1" />
   <sodipodi:namedview
      id="namedview1"
      pagecolor="#ffffff"
@@ -74,7 +49,7 @@
      width="18"
      height="20"
      rx="2"
-     style="fill:url(#linearGradient2);fill-opacity:1" />
+     style="fill:#63452c" />
   <path
      id="secondary"
      d="m 22,4 v 16 c 0,1.104569 -0.895431,2 -2,2 H 18 V 2 h 2 c 1.104569,0 2,0.8954305 2,2 z M 3.69,5.29 2.29,6.69 c -0.3811429,0.3888435 -0.3811429,1.0111565 0,1.4 L 8.9,14.71 C 9.0887188,14.897187 9.344197,15.001537 9.61,15 H 11 c 0.552285,0 1,-0.447715 1,-1 V 12.61 C 11.9963,12.345233 11.892734,12.091634 11.71,11.9 L 5.09,5.29 C 4.7011565,4.9088571 4.0788435,4.9088571 3.69,5.29 Z"
