@@ -133,13 +133,8 @@ class JournalWindow(Adw.ApplicationWindow):
             keys = self.journal.get_keys()
             if len(keys) > 0:
                 first = list(keys)[0]
-                year = first[:4]
-                month = first[5:7]
-                day = first[8:]
-                #TODO dispose date
-                date = GLib.DateTime.new_local(int(year), int(month), int(day), 0, 0, 0)
+                date = self.date_from_str(first)
                 self.calendar.select_day(date)
-                date.unref()
                 self.mark_calendar_days()
 
 
@@ -162,33 +157,29 @@ class JournalWindow(Adw.ApplicationWindow):
             # no entry for selected date
             if previous_key is None:
                 # if selected date is before last entry, display last entry
-                last_key = list(self.journal.get_keys())[0]
-                if current_date_str < last_key: # we don't care if it's >
-                    previous_key = last_key
-                else:
-                    # if selected date has no entry and is between two entries, select earlier one
-                    # find next lower entry
-                    lower_entry = None
-                    copy = list(keys).copy()
-                    copy.reverse()
-                    for key in list(copy): # entries are in SortedDict (high to low)
-                        if current_date_str > key:
-                            # previous key is lower entry
-                            lower_entry = copy[copy.index(key)]
-                            break
-                    if lower_entry is not None:
-                        previous_key = lower_entry
+                if len(keys) > 0:
+                    last_key = list(self.journal.get_keys())[0]
+                    if current_date_str < last_key: # we don't care if it's >
+                        previous_key = last_key
+                    else:
+                        # if selected date has no entry and is between two entries, select earlier one
+                        # find next lower entry
+                        copy = list(keys).copy()
+                        copy.reverse() # easier to go thru keys reversed
+                        for key in list(copy):
+                            if current_date_str > key:
+                                # previous key is lower entry
+                                previous_key = copy[copy.index(key)]
+                                break
             if previous_key is not None:
                 date = self.date_from_str(previous_key)
                 self.calendar.select_day(date)
-                date.unref()
                 self.mark_calendar_days()
 
 
     def on_today_action(self, action, parameters=None):
         if self.journal is not None:
             """Respond to request to navigate to 'today' in calendar."""
-            #TODO dispose date
             self.calendar.select_day(GLib.DateTime.new_now_local())
             self.date = self.calendar.get_date();
             self.mark_calendar_days()
@@ -231,7 +222,6 @@ class JournalWindow(Adw.ApplicationWindow):
             if next_key is not None:
                 date = self.date_from_str(next_key)
                 self.calendar.select_day(date)
-                date.unref()
                 self.mark_calendar_days()
 
 
@@ -241,13 +231,8 @@ class JournalWindow(Adw.ApplicationWindow):
             keys = self.journal.get_keys()
             if len(keys) > 0:
                 last = list(keys)[len(keys) - 1]
-                year = last[:4]
-                month = last[5:7]
-                day = last[8:]
-                #TODO dispose date
-                date = GLib.DateTime.new_local(int(year), int(month), int(day), 0, 0, 0)
+                date = self.date_from_str(last)
                 self.calendar.select_day(date)
-                date.unref()
                 self.mark_calendar_days()
 
 
@@ -256,7 +241,6 @@ class JournalWindow(Adw.ApplicationWindow):
         year = date_str[:4]
         month = date_str[5:7]
         day = date_str[8:]
-        #TODO dispose date
         return GLib.DateTime.new_local(int(year), int(month), int(day), 0, 0, 0)
 
 
@@ -330,7 +314,7 @@ class JournalWindow(Adw.ApplicationWindow):
                 self.mark_calendar_days()
                 self.show_toast("Journal saved.")
             date_str = self.calendar.get_date()
-            if date_str in self.journal:
+            if date_str in self.journal.get_keys():
                 journal_entry = self.journal.get_entry(date_str)
                 buffer.set_text(journal_entry)
             else:
