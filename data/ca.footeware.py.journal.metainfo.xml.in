@@ -7,7 +7,7 @@
   <name>Journal</name>
   <summary>An encrypted daily journal.</summary>
   <description>
-    <p>Password-encrypted and navigable via built-in calendar.</p>
+    <p>Password-encrypted files and navigable via built-in calendar.</p>
   </description>
 
   <developer id="tld.vendor">

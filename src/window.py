@@ -16,17 +16,21 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
-
-from gi.repository import Adw
-from gi.repository import Gtk
-from gi.repository import Gio
-from gi.repository import GLib
-import jprops
-import collections
 import os
 import gi
 gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
+from gi.repository import Adw
+from gi.repository import Gtk
+from gi.repository import Gio
+from gi.repository import GLib
+from cryptography.fernet import Fernet, InvalidToken
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+import base64
+import jprops
+from sortedcontainers import SortedDict
 
 
 @Gtk.Template(resource_path='/ca/footeware/py/journal/window.ui')
@@ -49,6 +53,7 @@ class JournalWindow(Adw.ApplicationWindow):
     save_button = Gtk.Template.Child()
     toast_overlay = Gtk.Template.Child()
     window_title = Gtk.Template.Child()
+
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -118,187 +123,230 @@ class JournalWindow(Adw.ApplicationWindow):
         self.buffer = self.textview.get_buffer()
         self.buffer.connect("changed", self.on_buffer_changed)
 
-        # initialize variables
-        self.properties = {}
-        self.date = GLib.DateTime.new_now_local()
+        self.journal = None
+        self.date = self.calendar.get_date()
 
 
     def on_first_action(self, action, parameters=None):
         """Respond to the First button being clicked."""
-        keys = self.get_sorted_keys()
-        if len(keys) > 0:
-            first = keys[0]
-            year = first[:4]
-            month = first[5:7]
-            day = first[8:]
-            date = GLib.DateTime.new_local(int(year), int(month), int(day), 0, 0, 0)
-            self.calendar.select_day(date)
-            self.mark_calendar_days()
+        if self.journal is not None:
+            keys = self.journal.get_keys()
+            if len(keys) > 0:
+                first = list(keys)[0]
+                year = first[:4]
+                month = first[5:7]
+                day = first[8:]
+                #TODO dispose date
+                date = GLib.DateTime.new_local(int(year), int(month), int(day), 0, 0, 0)
+                self.calendar.select_day(date)
+                date.unref()
+                self.mark_calendar_days()
 
 
     def on_previous_action(self, action, parameters=None):
         """Respond to the Previous button being clicked."""
-        current_date = self.calendar.get_date()
-        current_date_str = current_date.format('%Y-%m-%d')
-        keys = self.get_sorted_keys()
-        if len(keys) > 0:
-            key = None
-            if current_date_str in keys:
-                index = keys.index(current_date_str)
-                if index - 1 >= 0:
-                    # display previous entry
-                    key = keys[index - 1]
-            else:
-                # display last entry
-                key = keys[len(keys) - 1]
-            if key is not None:
-                year = key[:4]
-                month = key[5:7]
-                day = key[8:]
-                self.date = GLib.DateTime.new_local(int(year), int(month), int(day), 0, 0, 0)
-                self.calendar.select_day(self.date)
+        if self.journal is not None:
+            current_date = self.calendar.get_date()
+            current_date_str = current_date.format('%Y-%m-%d')
+            keys = self.journal.get_keys()
+            # find index of currently selected date, if exists, then find previous item
+            previous_key = None
+            try:
+                current_index = list(keys).index(current_date_str)
+                if current_index - 1 >= 0:
+                    previous_key_index = current_index - 1
+                    previous_key = list(keys)[previous_key_index]
+            except ValueError:
+                # current date has no entry
+                pass
+            # no entry for selected date
+            if previous_key is None:
+                # if selected date is before last entry, display last entry
+                last_key = list(self.journal.get_keys())[0]
+                if current_date_str < last_key: # we don't care if it's >
+                    previous_key = last_key
+                else:
+                    # if selected date has no entry and is between two entries, select earlier one
+                    # find next lower entry
+                    lower_entry = None
+                    copy = list(keys).copy()
+                    copy.reverse()
+                    for key in list(copy): # entries are in SortedDict (high to low)
+                        if current_date_str > key:
+                            # previous key is lower entry
+                            lower_entry = copy[copy.index(key)]
+                            break
+                    if lower_entry is not None:
+                        previous_key = lower_entry
+            if previous_key is not None:
+                date = self.date_from_str(previous_key)
+                self.calendar.select_day(date)
+                date.unref()
                 self.mark_calendar_days()
 
 
     def on_today_action(self, action, parameters=None):
-        """Respond to request to navigate to 'today' in calendar."""
-        self.calendar.select_day(GLib.DateTime.new_now_local())
-        self.date = self.calendar.get_date();
-        self.mark_calendar_days()
+        if self.journal is not None:
+            """Respond to request to navigate to 'today' in calendar."""
+            #TODO dispose date
+            self.calendar.select_day(GLib.DateTime.new_now_local())
+            self.date = self.calendar.get_date();
+            self.mark_calendar_days()
 
 
     def on_next_action(self, action, parameters=None):
         """Respond to the Next button being clicked."""
-        current_date = self.calendar.get_date()
-        current_date_str = current_date.format('%Y-%m-%d')
-        keys = self.get_sorted_keys()
-        if len(keys) > 0:
-            key = None
-            if current_date_str in keys:
-                index = keys.index(current_date_str)
-                if index + 1 <= len(keys) - 1:
-                    # display next entry
-                    key = keys[index + 1]
-            else:
-                # display first entry
-                key = keys[0]
-            if key is not None:
-                year = key[:4]
-                month = key[5:7]
-                day = key[8:]
-                self.date = GLib.DateTime.new_local(int(year), int(month), int(day), 0, 0, 0)
-                self.calendar.select_day(self.date)
+        if self.journal is not None:
+            current_date = self.calendar.get_date()
+            current_date_str = current_date.format('%Y-%m-%d')
+            keys = self.journal.get_keys()
+            # find index of currently selected date, if exists, then find next item
+            next_key = None
+            try:
+                current_index = list(keys).index(current_date_str)
+                if current_index + 1 < len(keys):
+                    next_key_index = current_index + 1
+                    next_key = list(keys)[next_key_index]
+            except ValueError:
+                # current date has no entry
+                pass
+            # no entry for selected date
+            if next_key is None:
+                # if selected date is before first entry, display first entry
+                first_key = list(self.journal.get_keys())[0]
+                if current_date_str < first_key: # we don't care if it's >
+                    next_key = first_key
+                else:
+                    # if selected date has no entry and is between two entries, select later one
+                    upper_entry = None
+                    copy = list(keys).copy()
+                    copy.reverse()
+                    for key in list(copy): # entries are in SortedDict (low to high)
+                        if key < current_date_str:
+                            # previous key is next higher entry
+                            upper_entry = copy[copy.index(key) - 1]
+                            break
+                    if upper_entry is not None:
+                        next_key = upper_entry
+            if next_key is not None:
+                date = self.date_from_str(next_key)
+                self.calendar.select_day(date)
+                date.unref()
                 self.mark_calendar_days()
 
 
     def on_last_action(self, action, parameters=None):
         """Respond to the Last button being clicked."""
-        keys = self.get_sorted_keys()
-        if len(keys) > 0:
-            last = keys[len(keys) - 1]
-            year = last[:4]
-            month = last[5:7]
-            day = last[8:]
-            date = GLib.DateTime.new_local(int(year), int(month), int(day), 0, 0, 0)
-            self.calendar.select_day(date)
-            self.mark_calendar_days()
+        if self.journal is not None:
+            keys = self.journal.get_keys()
+            if len(keys) > 0:
+                last = list(keys)[len(keys) - 1]
+                year = last[:4]
+                month = last[5:7]
+                day = last[8:]
+                #TODO dispose date
+                date = GLib.DateTime.new_local(int(year), int(month), int(day), 0, 0, 0)
+                self.calendar.select_day(date)
+                date.unref()
+                self.mark_calendar_days()
 
 
-    def get_sorted_keys(self):
-        """Return a sorted copy of the journal keys (dates)."""
-        keys = []
-        for key, value in self.properties.items():
-            keys.append(key)
-        keys.sort()
-        return keys
+    def date_from_str(self, date_str):
+        """Parses a string of format %Y-%m-%d into a GLib.DateTime."""
+        year = date_str[:4]
+        month = date_str[5:7]
+        day = date_str[8:]
+        #TODO dispose date
+        return GLib.DateTime.new_local(int(year), int(month), int(day), 0, 0, 0)
 
 
     def on_prev_month(self, calendar):
         """Respond to pressing of Previous Month button."""
-        self.date = calendar.get_date()
-        self.mark_calendar_days();
+        if self.journal is not None:
+            self.date = calendar.get_date()
+            self.mark_calendar_days();
 
 
     def on_next_month(self, calendar):
         """Respond to pressing of Next Month button."""
-        self.date = calendar.get_date()
-        self.mark_calendar_days();
+        if self.journal is not None:
+            self.date = calendar.get_date()
+            self.mark_calendar_days();
 
 
     def on_prev_year(self, calendar):
         """Respond to pressing of Previous Year button."""
-        self.date = calendar.get_date()
-        self.mark_calendar_days();
+        if self.journal is not None:
+            self.date = calendar.get_date()
+            self.mark_calendar_days();
 
 
     def on_next_year(self, calendar):
         """Respond to pressing of Next Year button."""
-        self.date = calendar.get_date()
-        self.mark_calendar_days();
+        if self.journal is not None:
+            self.date = calendar.get_date()
+            self.mark_calendar_days();
 
 
     def on_day_selected(self, calendar):
         """React to a new day being selected in the calendar."""
-        # store date from previous selection, we may need to save its entry
-        self.old_date = self.date
-        self.date = calendar.get_date()
-        date_str = self.date.format('%Y-%m-%d')
-        if self.window_title.get_title().startswith("• "):
-            dialog = Adw.MessageDialog(
-                transient_for=self,
-                modal=True,
-                heading="Save changes?",
-            )
-            file_name = os.path.basename(self.file_path)
-            dialog.set_body(f'The editor has unsaved changes. Do you want to save them?')
-            dialog.add_response("discard", "Discard")
-            dialog.add_response("save", "Save")
-            dialog.set_default_response("save")
-            dialog.set_close_response("save")
-            dialog.set_response_appearance("discard", Adw.ResponseAppearance.DESTRUCTIVE)
-            dialog.set_response_appearance("save", Adw.ResponseAppearance.SUGGESTED)
-            dialog.connect("response", self.on_save_journal_dialog_response)
-            dialog.show()
-        else:
-            if date_str in self.properties:
-                journal_entry = self.properties[date_str]
-                self.textview.get_buffer().set_text(journal_entry)
+        if self.journal is not None:
+            # store date from previous selection, we may need to save its entry
+            self.old_date = self.date
+            self.date = calendar.get_date()
+            if self.window_title.get_title().startswith("• "):
+                dialog = Adw.MessageDialog(
+                    transient_for=self,
+                    modal=True,
+                    heading="Save changes?",
+                )
+                file_name = os.path.basename(self.file_path)
+                dialog.set_body(f'The editor has unsaved changes. Do you want to save them?')
+                dialog.add_response("discard", "Discard")
+                dialog.add_response("save", "Save")
+                dialog.set_default_response("save")
+                dialog.set_close_response("save")
+                dialog.set_response_appearance("discard", Adw.ResponseAppearance.DESTRUCTIVE)
+                dialog.set_response_appearance("save", Adw.ResponseAppearance.SUGGESTED)
+                dialog.connect("response", self.on_save_journal_dialog_response)
+                dialog.show()
             else:
-                # key not found; date not in journal, clear editor
-                self.textview.get_buffer().set_text('')
+                if self.journal.contains_key(self.date):
+                    journal_entry = self.journal.get_entry(self.date)
+                    self.textview.get_buffer().set_text(journal_entry)
+                else:
+                    # key not found; date not in journal, clear editor
+                    self.textview.get_buffer().set_text('')
 
 
     def on_save_journal_dialog_response(self, dialog, response):
         """Respond to request to save current-1 journal entry."""
-        date_str = self.date.format('%Y-%m-%d')
-        buffer = self.textview.get_buffer()
-        if response == "save":
-            # update self.properties entry and save to file
-            journal_entry = buffer.get_text(buffer.get_start_iter(), buffer.get_end_iter(), True)
-            self.properties[self.old_date.format('%Y-%m-%d')] = journal_entry
-            # create file for writing, 'w' means to overwrite & write whole file
-            with open(self.file_path, 'w+t', encoding='UTF-8') as file:
-                self.delete_empty_entries()
-                jprops.store_properties(file, self.properties)
+        if self.journal is not None:
+            buffer = self.textview.get_buffer()
+            if response == "save":
+                # update self.journal entry and save to file
+                journal_entry = buffer.get_text(buffer.get_start_iter(), buffer.get_end_iter(), True)
+                self.journal.add_entry(self.old_date, journal_entry) # saves
                 self.mark_calendar_days()
                 self.show_toast("Journal saved.")
-        if date_str in self.properties:
-            journal_entry = self.properties[date_str]
-            buffer.set_text(journal_entry)
-        else:
-            buffer.set_text('')
-        buffer.set_modified(False)
-        self.add_title_prefix(False)
+            date_str = self.calendar.get_date()
+            if date_str in self.journal:
+                journal_entry = self.journal.get_entry(date_str)
+                buffer.set_text(journal_entry)
+            else:
+                buffer.set_text('')
+            buffer.set_modified(False)
+            self.add_title_prefix(False)
 
 
     def delete_empty_entries(self):
         """Remove any entries in self.properties that have an empty value."""
         keys_to_delete = []
-        for key, value in self.properties.items():
+        for key, value in self.journal.get_entries():
             if value == '':
                 keys_to_delete.append(key)
         for key in keys_to_delete:
-            self.properties.pop(key)
+            self.journal.remove_entry(key)
 
 
     def on_new_browse_for_folder_action(self, action, parameters=None):
@@ -328,31 +376,27 @@ class JournalWindow(Adw.ApplicationWindow):
                 self.show_toast("Passwords don't match")
             else:
                 file_path = os.path.join(location, journal_name)
-                self.create_journal_file(file_path, password_1)
-
-
-    def create_journal_file(self, file_path, password):
-        """Create a journal file."""
-        if os.path.isfile(file_path):
-            dialog = Adw.MessageDialog(
-                transient_for=self,
-                modal=True,
-                heading="Replace file?",
-            )
-            file_name = os.path.basename(file_path)
-            dialog.set_body(f'A file named {file_name} already exists. Do you want to replace it?')
-            dialog.add_response("cancel", "Cancel")
-            dialog.add_response("replace", "Replace")
-            dialog.set_default_response("cancel")
-            dialog.set_close_response("cancel")
-            dialog.set_response_appearance("replace", Adw.ResponseAppearance.DESTRUCTIVE)
-            dialog.connect("response", self.on_create_journal_dialog_response, file_path)
-            dialog.show()
-        else:
-            # create file for writing, 'x' means to fail if file already exists - a failsafe
-            with open(file_path, 'xt', encoding='UTF-8') as file:
-                self.file_path = file_path
-                self.on_create_journal_dialog_complete(file_path, file)
+                self.password = password_1
+                if os.path.isfile(file_path):
+                    dialog = Adw.MessageDialog(
+                        transient_for=self,
+                        modal=True,
+                        heading="Replace file?",
+                    )
+                    file_name = os.path.basename(file_path)
+                    dialog.set_body(f'A file named {file_name} already exists. Do you want to replace it?')
+                    dialog.add_response("cancel", "Cancel")
+                    dialog.add_response("replace", "Replace")
+                    dialog.set_default_response("cancel")
+                    dialog.set_close_response("cancel")
+                    dialog.set_response_appearance("replace", Adw.ResponseAppearance.DESTRUCTIVE)
+                    dialog.connect("response", self.on_create_journal_dialog_response, file_path)
+                    dialog.show()
+                else:
+                    # create file for writing, 'x' means to fail if file already exists - a failsafe
+                    with open(file_path, 'xt', encoding='UTF-8') as file:
+                        self.file_path = file_path
+                        self.on_create_journal_dialog_complete(file_path, file)
 
 
     def on_create_journal_dialog_response(self, dialog, response, file_path):
@@ -367,7 +411,8 @@ class JournalWindow(Adw.ApplicationWindow):
     def on_create_journal_dialog_complete(self, file_path, file):
         """Complete journal creation process by enabling widgets,
         setting subtitle and setting focus in textview."""
-        jprops.store_properties(file, self.properties)
+        self.journal = Journal(file_path, self.password)
+        self.date = self.calendar.get_date()
         self.enable_widgets(True)
         self.textview.grab_focus()
         # clear textview
@@ -394,53 +439,48 @@ class JournalWindow(Adw.ApplicationWindow):
         self.properties = {}
         self.file_path = ''
         file_path = self.existing_journal_location.get_text()
-        password = self.existing_journal_password.get_text()
-        if file_path != '' and password != '':
+        self.password = self.existing_journal_password.get_text()
+        if file_path != '' and self.password != '':
             try:
-                with open(file_path, 'a+t', encoding='UTF-8') as file:
-                    file.seek(0) # reset cursor
-                    self.properties = jprops.load_properties(file, collections.OrderedDict)
-                    self.mark_calendar_days()
-                    self.file_path = file_path
-                    self.enable_widgets(True)
-                    self.textview.grab_focus()
-                    # load today's journal entry if exists
-                    date_str = self.date.format('%Y-%m-%d')
-                    journal_entry = self.properties[date_str]
+                self.journal = Journal(file_path, self.password)
+                self.mark_calendar_days()
+                self.date = self.calendar.get_date()
+                self.enable_widgets(True)
+                self.textview.grab_focus()
+                # load today's journal entry if exists
+                try:
+                    journal_entry = self.journal.get_entry(self.calendar.get_date())
                     self.textview.get_buffer().set_text(journal_entry)
-                    self.textview.get_buffer().set_modified(False)
-                    self.window_title.set_subtitle(file_path)
-                    self.show_toast("Journal opened.")
-            except UnicodeDecodeError as e:
-                self.show_toast('Unable to open file.')
-            except KeyError as e:
-                # no entry for to display for today
+                except KeyError:
+                    # no entry for today
+                    pass
+                self.textview.get_buffer().set_modified(False)
+                self.window_title.set_subtitle(file_path)
                 self.show_toast("Journal opened.")
+            except InvalidToken as e:
+                self.show_toast("'InvalidToken' error. Is the password incorrect?")
 
 
     def mark_calendar_days(self):
         """Read the journal and mark the calendar days for the month that are keys."""
-        self.calendar.clear_marks()
-        for key, value in self.properties.items():
-            if self.date.get_year() == int(key[:4]) and self.date.get_month() == int(key[5:7]) and value != '':
-                self.calendar.mark_day(int(key[8:]))
+        if self.journal is not None:
+            self.calendar.clear_marks()
+            for key, value in self.journal.get_entries():
+                date = self.calendar.get_date()
+                if date.get_year() == int(key[:4]) and date.get_month() == int(key[5:7]) and value != '':
+                    self.calendar.mark_day(int(key[8:]))
 
 
     def on_save_journal_action(self, action, parameters=None):
         """Respond to request to save a journal."""
-        if self.textview.get_buffer().get_modified():
-            buffer = self.textview.get_buffer()
-            journal_entry = buffer.get_text(buffer.get_start_iter(), buffer.get_end_iter(), True)
-            date_str = self.date.format('%Y-%m-%d')
-            self.properties[date_str] = journal_entry
-            if self.file_path:
-                with open(self.file_path, 'wt', encoding='UTF-8') as file:
-                    self.delete_empty_entries()
-                    #TODO encrypt
-                    jprops.store_properties(file, self.properties)
-                    buffer.set_modified(False)
-                    self.window_title.set_title('Journal')
-                    self.show_toast('Journal saved.')
+        if self.journal is not None:
+            if self.textview.get_buffer().get_modified():
+                buffer = self.textview.get_buffer()
+                journal_entry = buffer.get_text(buffer.get_start_iter(), buffer.get_end_iter(), True)
+                self.journal.add_entry(self.calendar.get_date(), journal_entry)
+                buffer.set_modified(False)
+                self.window_title.set_title('Journal')
+                self.show_toast('Journal saved.')
 
 
     def enable_widgets(self, enable):
@@ -463,10 +503,11 @@ class JournalWindow(Adw.ApplicationWindow):
 
     def on_buffer_changed(self, buffer):
         """Handle text buffer change by prepending an asterisk to the title."""
-        date_str = self.date.format('%Y-%m-%d')
         displayed_text = buffer.get_text(buffer.get_start_iter(), buffer.get_end_iter(), True)
-        if date_str in self.properties:
-            journal_entry = self.properties[date_str]
+        self.date = self.calendar.get_date()
+        date_str = self.date.format('%Y-%m-%d')
+        if date_str in self.journal.get_keys():
+            journal_entry = self.journal.get_entry(self.date)
             if displayed_text != journal_entry:
                 self.add_title_prefix(True)
             else:
@@ -483,3 +524,105 @@ class JournalWindow(Adw.ApplicationWindow):
                 self.window_title.set_title(f'• {title_str}')
         else:
             self.window_title.set_title('Journal')
+
+
+class Journal:
+    """A map where the keys are dates in the format %Y-%m%d and the values are textual entries."""
+
+    def __init__(self, file_path, password):
+        """Initialization."""
+        self.file_path = file_path
+        self.password = password
+        self.entries = {}
+        # load entries if any
+        try:
+            with open(file_path, 'rt', encoding='UTF-8') as file:
+                encrypted = jprops.load_properties(file, SortedDict)
+                for key, value in encrypted.items():
+                    decrypted_value = self.decrypt(value, self.password)
+                    self.entries[key] = decrypted_value
+        except FileNotFoundError:
+            pass  # No existing journal file
+        self.save()
+
+
+    def save(self):
+        """Save all entries to file."""
+        with open(self.file_path, 'wt', encoding='UTF-8') as file:
+            self.prune_empty_values()
+            encrypted = {}
+            for key, value in self.entries.items():
+                encrypted_value = self.encrypt(value, self.password)
+                encrypted[key] = encrypted_value
+            jprops.store_properties(file, encrypted)
+
+
+    def prune_empty_values(self):
+        pruned = {}
+        for key, value in self.entries.items():
+            if value != '':
+                pruned[key] = value
+        return pruned
+
+
+    def add_entry(self, date, text):
+        """Add a new entry."""
+        date_str = date.format('%Y-%m-%d')
+        self.entries[date_str] = text
+        self.save()
+
+
+    def get_keys(self):
+        """Get all the dates in this journal."""
+        return self.entries.keys()
+
+
+    def get_entry(self, key):
+        """Get a date's entry.'"""
+        if isinstance(key, GLib.DateTime):
+            key = key.format('%Y-%m-%d')
+        return self.entries[key]
+
+
+    def get_entries(self):
+        """Get all entries in this journal."""
+        return self.entries.items()
+
+
+    def remove_entry(self, key):
+        """Remove an entry."""
+        if isinstance(key, GLib.DateTime):
+            key = key.format('%Y-%m-%d')
+        self.entries.pop(key)
+
+
+    def contains_key(self, key):
+        index = None
+        if isinstance(key, GLib.DateTime):
+            key = key.format('%Y-%m-%d')
+        try:
+            index = list(self.entries.keys()).index(key)
+            return index is not None
+        except ValueError:
+            # no entry for key
+            return False
+
+
+    def encrypt(self, plaintext, password):
+        """Encrypt the provided `plaintext` using provided `password`."""
+        if isinstance(plaintext, str):
+            plaintext = plaintext.encode("utf-8")
+        encrypted_bytes = self.cipherFernet(password.encode("utf-8")).encrypt(plaintext)
+        return encrypted_bytes.decode("utf-8")
+
+
+    def decrypt(self, ciphertext, password):
+        """Decrypt the provided `ciphertext` using provided `password`."""
+        decrypted_bytes = self.cipherFernet(password.encode("utf-8")).decrypt(ciphertext)
+        return decrypted_bytes.decode("utf-8")
+
+
+    def cipherFernet(self, password):
+        """Create a hairy little Fernet."""
+        key = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=b'abcd', iterations=1000, backend=default_backend()).derive(password)
+        return Fernet(base64.urlsafe_b64encode(key))
