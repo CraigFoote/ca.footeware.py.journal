@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Uploaded to: SVG Repo, www.svgrepo.com, Transformed by: SVG Repo Mixer Tools -->
 
 <svg
    fill="#000000"
@@ -26,33 +27,36 @@
      inkscape:pageopacity="0"
      inkscape:pagecheckerboard="1"
      inkscape:deskcolor="#d1d1d1"
-     inkscape:zoom="1.3575"
-     inkscape:cx="400.36832"
-     inkscape:cy="399.63168"
+     inkscape:zoom="1.0997512"
+     inkscape:cx="287.79238"
+     inkscape:cy="375.99415"
      inkscape:window-width="2304"
      inkscape:window-height="1371"
      inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
-     inkscape:current-layer="diary-left" />
+     inkscape:current-layer="diary-left"
+     showgrid="false" />
   <g
-     id="SVGRepo_bgCarrier"
-     stroke-width="0" />
-  <g
-     id="SVGRepo_tracerCarrier"
-     stroke-linecap="round"
-     stroke-linejoin="round" />
-  <rect
-     id="primary"
-     x="4"
-     y="2"
-     width="18"
-     height="20"
-     rx="2"
-     style="fill:#63452c" />
-  <path
-     id="secondary"
-     d="m 22,4 v 16 c 0,1.104569 -0.895431,2 -2,2 H 18 V 2 h 2 c 1.104569,0 2,0.8954305 2,2 z M 3.69,5.29 2.29,6.69 c -0.3811429,0.3888435 -0.3811429,1.0111565 0,1.4 L 8.9,14.71 C 9.0887188,14.897187 9.344197,15.001537 9.61,15 H 11 c 0.552285,0 1,-0.447715 1,-1 V 12.61 C 11.9963,12.345233 11.892734,12.091634 11.71,11.9 L 5.09,5.29 C 4.7011565,4.9088571 4.0788435,4.9088571 3.69,5.29 Z"
-     style="fill:#986a44"
-     sodipodi:nodetypes="sssccsscccccsscccc" />
+     id="g1"
+     transform="translate(-0.01509191,-0.522201)">
+    <path
+       id="secondary-5"
+       d="M 20.222937,23.044402 H 5.7981045 c -0.9958264,0 -1.803104,-0.895431 -1.803104,-2 v -2 H 22.026041 v 2 c 0,1.104569 -0.807277,2 -1.803104,2 z"
+       style="display:inline;fill:#cdab8f;stroke-width:0.949501"
+       sodipodi:nodetypes="sssccss" />
+    <rect
+       id="primary"
+       x="4"
+       y="2"
+       width="18"
+       height="20"
+       rx="2"
+       style="display:inline;fill:#63452c" />
+    <path
+       id="secondary"
+       d="m 22,4 v 16 c 0,1.104569 -0.895431,2 -2,2 H 18 V 2 h 2 c 1.104569,0 2,0.8954305 2,2 z M 3.69,5.29 2.29,6.69 c -0.3811429,0.3888435 -0.3811429,1.0111565 0,1.4 L 8.9,14.71 C 9.0887188,14.897187 9.344197,15.001537 9.61,15 H 11 c 0.552285,0 1,-0.447715 1,-1 V 12.61 C 11.9963,12.345233 11.892734,12.091634 11.71,11.9 L 5.09,5.29 C 4.7011565,4.9088571 4.0788435,4.9088571 3.69,5.29 Z"
+       style="display:inline;fill:#986a44"
+       sodipodi:nodetypes="sssccsscccccsscccc" />
+  </g>
 </svg>

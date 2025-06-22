@@ -71,7 +71,7 @@
                             </child>
                             <child>
                               <object class="GtkEntry" id="existing_journal_location">
-                                <property name="placeholder_text">Browse for journal location</property>
+                                <property name="placeholder_text">Browse for journal</property>
                                 <property name="has_frame">true</property>
                                 <property name="editable">false</property>
                                 <property name="can_focus">false</property>

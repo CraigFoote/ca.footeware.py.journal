@@ -56,6 +56,7 @@ class JournalApplication(Adw.Application):
                                 application_icon='ca.footeware.py.journal',
                                 developer_name='Another fine mess by Footeware.ca',
                                 version='0.0.1',
+                                license_type=Gtk.License.GPL_3_0,
                                 developers=['Craig Foote https://footeware.ca'],
                                 copyright='© 2025 Craig Foote')
         # Translators: Replace "translator-credits" with your name/username, and optionally an email or URL.
