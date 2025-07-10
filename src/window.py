@@ -35,6 +35,7 @@ from sortedcontainers import SortedDict
 
 @Gtk.Template(resource_path='/ca/footeware/py/journal/window.ui')
 class JournalWindow(Adw.ApplicationWindow):
+    """The main window class."""
     __gtype_name__ = 'JournalWindow'
 
     calendar = Gtk.Template.Child()
@@ -56,6 +57,7 @@ class JournalWindow(Adw.ApplicationWindow):
 
 
     def __init__(self, **kwargs):
+        """Initialize this Journal instance."""
         super().__init__(**kwargs)
 
         # read UI file
@@ -511,7 +513,7 @@ class JournalWindow(Adw.ApplicationWindow):
 
 
 class Journal:
-    """A map where the keys are dates in the format %Y-%m%d and the values are textual entries."""
+    """A map where the keys are dates in the format %Y-%m-%d and the values are textual entries."""
 
     def __init__(self, file_path, password):
         """Initialization."""
@@ -542,6 +544,7 @@ class Journal:
 
 
     def prune_empty_values(self):
+        """Remove from self.entries those that have a blank value."""
         pruned = {}
         for key, value in self.entries.items():
             if value != '':
@@ -581,6 +584,7 @@ class Journal:
 
 
     def contains_key(self, key):
+        """Determines if the provided key is a key in self.entries."""
         index = None
         if isinstance(key, GLib.DateTime):
             key = key.format('%Y-%m-%d')

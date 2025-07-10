@@ -1,5 +1,5 @@
 [Desktop Entry]
-Name=journal
+Name=Journal
 Exec=journal
 Icon=ca.footeware.py.journal
 Terminal=false

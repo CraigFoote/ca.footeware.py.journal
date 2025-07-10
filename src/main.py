@@ -37,7 +37,7 @@ class JournalApplication(Adw.Application):
                          resource_base_path='/ca/footeware/py/journal')
         self.create_action('quit', lambda *_: self.quit(), ['<primary>q'])
         self.create_action('about', self.on_about_action)
-        self.create_action('preferences', self.on_preferences_action)
+
 
     def do_activate(self):
         """Called when the application is activated.
@@ -50,12 +50,13 @@ class JournalApplication(Adw.Application):
             win = JournalWindow(application=self)
         win.present()
 
+
     def on_about_action(self, *args):
         """Callback for the app.about action."""
         about = Adw.AboutDialog(application_name='Journal',
                                 application_icon='ca.footeware.py.journal',
                                 developer_name='Another fine mess by Footeware.ca',
-                                version='0.0.1',
+                                version='1.0.1',
                                 license_type=Gtk.License.GPL_3_0,
                                 developers=['Craig Foote https://footeware.ca'],
                                 copyright='© 2025 Craig Foote')
@@ -63,9 +64,6 @@ class JournalApplication(Adw.Application):
         about.set_translator_credits(_('translator-credits'))
         about.present(self.props.active_window)
 
-    def on_preferences_action(self, widget, _):
-        """Callback for the app.preferences action."""
-        print('app.preferences action activated')
 
     def create_action(self, name, callback, shortcuts=None):
         """Add an application action.

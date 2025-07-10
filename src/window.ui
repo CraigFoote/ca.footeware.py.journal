@@ -151,7 +151,7 @@
                             <property name="row_spacing">15</property>
                             <child>
                               <object class="GtkLabel">
-                                <property name="label">Folder Location</property>
+                                <property name="label">Folder</property>
                                 <property name="halign">end</property>
                                 <layout>
                                   <property name="column">0</property>
@@ -392,10 +392,6 @@
   </template>
   <menu id="primary_menu">
     <section>
-      <item>
-        <attribute name="action">app.preferences</attribute>
-        <attribute name="label" translatable="yes">_Preferences</attribute>
-      </item>
       <item>
         <attribute name="action">win.show-help-overlay</attribute>
         <attribute name="label" translatable="yes">_Keyboard Shortcuts</attribute>
