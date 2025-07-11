@@ -145,7 +145,7 @@ class JournalWindow(Adw.ApplicationWindow):
         if self.journal is not None:
             current_date = self.calendar.get_date()
             current_date_str = current_date.format('%Y-%m-%d')
-            keys = self.journal.get_keys()
+            keys = sorted(list(self.journal.get_keys()))
             # find index of currently selected date, if exists, then find previous item
             previous_key = None
             try:
@@ -192,7 +192,7 @@ class JournalWindow(Adw.ApplicationWindow):
         if self.journal is not None:
             current_date = self.calendar.get_date()
             current_date_str = current_date.format('%Y-%m-%d')
-            keys = self.journal.get_keys()
+            keys = sorted(list(self.journal.get_keys()))
             # find index of currently selected date, if exists, then find next item
             next_key = None
             try:
