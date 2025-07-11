@@ -134,7 +134,7 @@ class JournalWindow(Adw.ApplicationWindow):
         if self.journal is not None:
             keys = self.journal.get_keys()
             if len(keys) > 0:
-                first = list(keys)[0]
+                first = sorted(list(keys))[0]
                 date = self.date_from_str(first)
                 self.calendar.select_day(date)
                 self.mark_calendar_days()
@@ -232,7 +232,7 @@ class JournalWindow(Adw.ApplicationWindow):
         if self.journal is not None:
             keys = self.journal.get_keys()
             if len(keys) > 0:
-                last = list(keys)[len(keys) - 1]
+                last = sorted(list(keys))[len(keys) - 1]
                 date = self.date_from_str(last)
                 self.calendar.select_day(date)
                 self.mark_calendar_days()
