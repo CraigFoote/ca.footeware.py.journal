@@ -464,6 +464,7 @@ class JournalWindow(Adw.ApplicationWindow):
                 buffer = self.textview.get_buffer()
                 journal_entry = buffer.get_text(buffer.get_start_iter(), buffer.get_end_iter(), True)
                 self.journal.add_entry(self.calendar.get_date(), journal_entry)
+                self.mark_calendar_days()
                 buffer.set_modified(False)
                 self.window_title.set_title('Journal')
                 self.show_toast('Journal saved.')
