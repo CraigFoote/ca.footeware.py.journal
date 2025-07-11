@@ -189,7 +189,7 @@ class JournalWindow(Adw.ApplicationWindow):
 
     def on_next_action(self, action, parameters=None):
         """Respond to the Next button being clicked."""
-        if self.journal is not None:
+        if self.journal is not None and len(self.journal.get_entries()) > 0:
             current_date = self.calendar.get_date()
             current_date_str = current_date.format('%Y-%m-%d')
             keys = sorted(list(self.journal.get_keys()))
@@ -323,16 +323,6 @@ class JournalWindow(Adw.ApplicationWindow):
                 buffer.set_text('')
             buffer.set_modified(False)
             self.add_title_prefix(False)
-
-
-    def delete_empty_entries(self):
-        """Remove any entries in self.properties that have an empty value."""
-        keys_to_delete = []
-        for key, value in self.journal.get_entries():
-            if value == '':
-                keys_to_delete.append(key)
-        for key in keys_to_delete:
-            self.journal.remove_entry(key)
 
 
     def on_new_browse_for_folder_action(self, action, parameters=None):
@@ -538,7 +528,7 @@ class Journal:
         with open(self.file_path, 'wt', encoding='UTF-8') as file:
             self.prune_empty_values()
             encrypted = {}
-            for key, value in self.entries.items():
+            for key, value in sorted(list(self.entries.items())):
                 encrypted_value = self.encrypt(value, self.password)
                 encrypted[key] = encrypted_value
             jprops.store_properties(file, encrypted)
@@ -546,11 +536,12 @@ class Journal:
 
     def prune_empty_values(self):
         """Remove from self.entries those that have a blank value."""
-        pruned = {}
+        keys_to_pop = []
         for key, value in self.entries.items():
-            if value != '':
-                pruned[key] = value
-        return pruned
+            if value == '':
+                keys_to_pop.append(key)
+        for key in keys_to_pop:
+            self.entries.pop(key)
 
 
     def add_entry(self, date, text):

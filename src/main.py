@@ -56,7 +56,7 @@ class JournalApplication(Adw.Application):
         about = Adw.AboutDialog(application_name='Journal',
                                 application_icon='ca.footeware.py.journal',
                                 developer_name='Another fine mess by Footeware.ca',
-                                version='1.0.1',
+                                version='1.0.2',
                                 license_type=Gtk.License.GPL_3_0,
                                 developers=['Craig Foote https://footeware.ca'],
                                 copyright='© 2025 Craig Foote')
