@@ -56,8 +56,10 @@ class JournalApplication(Adw.Application):
         about = Adw.AboutDialog(application_name='Journal',
                                 application_icon='ca.footeware.py.journal',
                                 developer_name='Another fine mess by Footeware.ca',
-                                version='1.0.2',
+                                version='1.1.0',
+                                issue_url='https://github.com/CraigFoote/ca.footeware.py.journal/issues',
                                 license_type=Gtk.License.GPL_3_0,
+                                support_url='https://github.com/CraigFoote/ca.footeware.py.journal',
                                 developers=['Craig Foote https://footeware.ca'],
                                 copyright='© 2025 Craig Foote')
         # Translators: Replace "translator-credits" with your name/username, and optionally an email or URL.

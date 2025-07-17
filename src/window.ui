@@ -194,7 +194,7 @@
                             </child>
                             <child>
                               <object class="GtkEntry" id="new_journal_name">
-                                <property name="placeholder_text">new journal name</property>
+                                <property name="placeholder_text">New journal name</property>
                                 <property name="has_frame">true</property>
                                 <property name="hexpand">true</property>
                                 <layout>
