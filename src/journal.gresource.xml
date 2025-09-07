@@ -8,6 +8,8 @@
     <file preprocess="xml-stripblanks" alias="icons/right-symbolic.svg">../data/icons/hicolor/symbolic/actions/right-symbolic.svg</file>
     <file preprocess="xml-stripblanks" alias="icons/last-symbolic.svg">../data/icons/hicolor/symbolic/actions/last-symbolic.svg</file>
     <file preprocess="xml-stripblanks" alias="icons/today-symbolic.svg">../data/icons/hicolor/symbolic/actions/today-symbolic.svg</file>
+    <file preprocess="xml-stripblanks" alias="icons/journal.svg">../data/icons/hicolor/scalable/apps/ca.footeware.py.journal.svg</file>
+    <file preprocess="xml-stripblanks" alias="icons/key.svg">../data/icons/hicolor/scalable/apps/ca.footeware.py.journal.key.svg</file>
   </gresource>
 </gresources>
 

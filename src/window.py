@@ -54,6 +54,12 @@ class JournalWindow(Adw.ApplicationWindow):
     save_button = Gtk.Template.Child()
     toast_overlay = Gtk.Template.Child()
     window_title = Gtk.Template.Child()
+    stack = Gtk.Template.Child()
+    new_open_button_box = Gtk.Template.Child()
+    new_button = Gtk.Template.Child()
+    new_page_box = Gtk.Template.Child()
+    open_page_box = Gtk.Template.Child()
+    editor_page_box = Gtk.Template.Child()
 
 
     def __init__(self, **kwargs):
@@ -62,6 +68,19 @@ class JournalWindow(Adw.ApplicationWindow):
 
         # read UI file
         self.init_template()
+
+        # open stack to its initial page
+        self.stack.set_visible_child(self.new_open_button_box)
+
+        # 'New' journal action
+        new_journal_action = Gio.SimpleAction.new("new_journal", None)
+        new_journal_action.connect("activate", self.on_new_journal_action)
+        self.add_action(new_journal_action)
+
+        # 'Open' existing journal action
+        open_existing_journal_action = Gio.SimpleAction.new("open_existing_journal", None)
+        open_existing_journal_action.connect("activate", self.on_open_existing_journal_action)
+        self.add_action(open_existing_journal_action)
 
         # 'New - Browse For Folder' action
         new_browse_for_folder_action = Gio.SimpleAction.new("new_browse_for_folder", None)
@@ -127,6 +146,16 @@ class JournalWindow(Adw.ApplicationWindow):
 
         self.journal = None
         self.date = self.calendar.get_date()
+
+
+    def on_new_journal_action(self, action, parameters=None):
+        """Respond to the New [journal] button being clicked."""
+        self.stack.set_visible_child(self.new_page_box)
+
+
+    def on_open_existing_journal_action(self, action, parameters=None):
+        """Respond to the Open [existing journal] button being clicked."""
+        self.stack.set_visible_child(self.open_page_box)
 
 
     def on_first_action(self, action, parameters=None):
@@ -389,7 +418,6 @@ class JournalWindow(Adw.ApplicationWindow):
         setting subtitle and setting focus in textview."""
         self.journal = Journal(file_path, self.password)
         self.date = self.calendar.get_date()
-        self.enable_widgets(True)
         self.textview.grab_focus()
         # clear textview
         self.textview.get_buffer().set_text('')
@@ -421,7 +449,6 @@ class JournalWindow(Adw.ApplicationWindow):
                 self.journal = Journal(file_path, self.password)
                 self.mark_calendar_days()
                 self.date = self.calendar.get_date()
-                self.enable_widgets(True)
                 self.textview.grab_focus()
                 # load today's journal entry if exists
                 try:
@@ -458,18 +485,6 @@ class JournalWindow(Adw.ApplicationWindow):
                 buffer.set_modified(False)
                 self.window_title.set_title('Journal')
                 self.show_toast('Journal saved.')
-
-
-    def enable_widgets(self, enable):
-        """Enable/disable the inputs."""
-        self.textview.set_can_target(enable)
-        self.calendar.set_can_target(enable)
-        self.first_button.set_can_target(enable)
-        self.previous_button.set_can_target(enable)
-        self.today_button.set_can_target(enable)
-        self.next_button.set_can_target(enable)
-        self.last_button.set_can_target(enable)
-        self.save_button.set_can_target(enable)
 
 
     def show_toast(self, message):
