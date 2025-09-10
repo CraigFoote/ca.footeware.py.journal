@@ -442,6 +442,8 @@ class JournalWindow(Adw.ApplicationWindow):
         self.textview.get_buffer().set_text('')
         self.textview.get_buffer().set_modified(False)
         self.window_title.set_subtitle(self.file_path)
+        self.back_button.set_sensitive(False)
+        self.back_button.set_visible(False)
         self.stack.set_visible_child(self.editor_page_box)
 
 
@@ -478,6 +480,8 @@ class JournalWindow(Adw.ApplicationWindow):
                     pass
                 self.textview.get_buffer().set_modified(False)
                 self.window_title.set_subtitle(file_path)
+                self.back_button.set_sensitive(False)
+                self.back_button.set_visible(False)
                 self.stack.set_visible_child(self.editor_page_box)
             except InvalidToken as e:
                 self.toast_overlay_open.add_toast(Adw.Toast.new("'InvalidToken' error. Is the password correct?"))

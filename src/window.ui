@@ -448,6 +448,7 @@
                 <property name="action-name">win.back_button</property>
                 <property name="icon-name">go-previous-symbolic</property>
                 <property name="sensitive">False</property>
+                <property name="tooltip-text">Back</property>
                 <property name="visible">False</property>
               </object>
             </child>
