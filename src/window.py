@@ -52,7 +52,9 @@ class JournalWindow(Adw.ApplicationWindow):
     next_button = Gtk.Template.Child()
     last_button = Gtk.Template.Child()
     save_button = Gtk.Template.Child()
-    toast_overlay = Gtk.Template.Child()
+    toast_overlay_new = Gtk.Template.Child()
+    toast_overlay_open = Gtk.Template.Child()
+    toast_overlay_editor = Gtk.Template.Child()
     window_title = Gtk.Template.Child()
     stack = Gtk.Template.Child()
     new_open_button_box = Gtk.Template.Child()
@@ -343,7 +345,7 @@ class JournalWindow(Adw.ApplicationWindow):
                 journal_entry = buffer.get_text(buffer.get_start_iter(), buffer.get_end_iter(), True)
                 self.journal.add_entry(self.old_date, journal_entry) # saves
                 self.mark_calendar_days()
-                self.show_toast("Journal saved.")
+                self.toast_overlay_editor.add_toast(Adw.Toast.new("Journal saved"))
             date_str = self.calendar.get_date()
             if date_str in self.journal.get_keys():
                 journal_entry = self.journal.get_entry(date_str)
@@ -378,7 +380,7 @@ class JournalWindow(Adw.ApplicationWindow):
         password_2 = self.new_journal_password_2.get_text() # do not trim whitespace
         if location != '' and journal_name != '' and password_1 != '' and password_2 != '':
             if password_1 != password_2:
-                self.show_toast("Passwords don't match")
+                self.toast_overlay_new.add_toast(Adw.Toast.new("Passwords don't match"))
             else:
                 file_path = os.path.join(location, journal_name)
                 self.password = password_1
@@ -423,7 +425,7 @@ class JournalWindow(Adw.ApplicationWindow):
         self.textview.get_buffer().set_text('')
         self.textview.get_buffer().set_modified(False)
         self.window_title.set_subtitle(self.file_path)
-        self.show_toast("New journal created.")
+        self.stack.set_visible_child(self.editor_page_box)
 
 
     def on_open_browse_for_journal_action(self, action, parameters=None):
@@ -459,9 +461,9 @@ class JournalWindow(Adw.ApplicationWindow):
                     pass
                 self.textview.get_buffer().set_modified(False)
                 self.window_title.set_subtitle(file_path)
-                self.show_toast("Journal opened.")
+                self.stack.set_visible_child(self.editor_page_box)
             except InvalidToken as e:
-                self.show_toast("'InvalidToken' error. Is the password incorrect?")
+                self.toast_overlay_open.add_toast(Adw.Toast.new("'InvalidToken' error. Is the password correct?"))
 
 
     def mark_calendar_days(self):
@@ -478,19 +480,14 @@ class JournalWindow(Adw.ApplicationWindow):
         """Respond to request to save a journal."""
         if self.journal is not None:
             if self.textview.get_buffer().get_modified():
+                print('on_save_journal_action')
                 buffer = self.textview.get_buffer()
                 journal_entry = buffer.get_text(buffer.get_start_iter(), buffer.get_end_iter(), True)
                 self.journal.add_entry(self.calendar.get_date(), journal_entry)
                 self.mark_calendar_days()
                 buffer.set_modified(False)
                 self.window_title.set_title('Journal')
-                self.show_toast('Journal saved.')
-
-
-    def show_toast(self, message):
-        """Show a notification to the user."""
-        toast = Adw.Toast.new(message)
-        self.toast_overlay.add_toast(toast)
+                self.toast_overlay_editor.add_toast(Adw.Toast.new("Journal saved"))
 
 
     def on_buffer_changed(self, buffer):

@@ -12,26 +12,7 @@
   <template class="JournalWindow" parent="AdwApplicationWindow">
     <property name="content">
       <object class="AdwToolbarView">
-        <child type="top">
-          <object class="AdwHeaderBar">
-            <property name="centering-policy">strict</property>
-            <property name="title-widget">
-              <object class="AdwWindowTitle" id="window_title">
-                <property name="subtitle">An encrypted daily journal</property>
-                <property name="title">Journal</property>
-              </object>
-            </property>
-            <child type="end">
-              <object class="GtkMenuButton">
-                <property name="icon-name">open-menu-symbolic</property>
-                <property name="menu-model">primary_menu</property>
-                <property name="primary">true</property>
-                <property name="tooltip-text" translatable="yes">Main Menu</property>
-              </object>
-            </child>
-          </object>
-        </child>
-        <child>
+        <property name="content">
           <object class="GtkStack" id="stack">
             <property name="hexpand">True</property>
             <property name="transition-type">slide-up</property>
@@ -94,9 +75,10 @@
                     <property name="row-spacing">20</property>
                     <child>
                       <object class="GtkLabel">
+                        <property name="css-classes">heading</property>
                         <property name="halign">center</property>
                         <property name="justify">center</property>
-                        <property name="label">&lt;b&gt;Create a new journal.&lt;/b&gt;</property>
+                        <property name="label">Create a new journal.</property>
                         <property name="margin-bottom">20</property>
                         <property name="use-markup">True</property>
                         <property name="valign">center</property>
@@ -228,6 +210,17 @@
                         </layout>
                       </object>
                     </child>
+                    <child>
+                      <object class="AdwToastOverlay" id="toast_overlay_new">
+                        <property name="hexpand">True</property>
+                        <property name="vexpand">True</property>
+                        <layout>
+                          <property name="column">0</property>
+                          <property name="column-span">3</property>
+                          <property name="row">7</property>
+                        </layout>
+                      </object>
+                    </child>
                   </object>
                 </property>
               </object>
@@ -244,9 +237,10 @@
                     <property name="row-spacing">15</property>
                     <child>
                       <object class="GtkLabel">
+                        <property name="css-classes">heading</property>
                         <property name="halign">center</property>
                         <property name="justify">center</property>
-                        <property name="label">&lt;b&gt;Open an existing journal.&lt;/b&gt;</property>
+                        <property name="label">Open an existing journal.</property>
                         <property name="margin-bottom">20</property>
                         <property name="use-markup">True</property>
                         <property name="xalign">-0.0</property>
@@ -314,7 +308,6 @@
                     <child>
                       <object class="GtkButton">
                         <property name="action-name">win.open_journal</property>
-                        <property name="can-target">False</property>
                         <property name="halign">end</property>
                         <property name="label">Open Journal</property>
                         <layout>
@@ -333,6 +326,17 @@
                           <property name="column">0</property>
                           <property name="column-span">3</property>
                           <property name="row">4</property>
+                        </layout>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="AdwToastOverlay" id="toast_overlay_open">
+                        <property name="hexpand">True</property>
+                        <property name="vexpand">True</property>
+                        <layout>
+                          <property name="column">0</property>
+                          <property name="column-span">3</property>
+                          <property name="row">5</property>
                         </layout>
                       </object>
                     </child>
@@ -355,6 +359,10 @@
                         <property name="halign">center</property>
                         <property name="hexpand">True</property>
                         <property name="homogeneous">True</property>
+                        <property name="margin-bottom">10</property>
+                        <property name="margin-end">10</property>
+                        <property name="margin-start">10</property>
+                        <property name="margin-top">10</property>
                         <property name="spacing">5</property>
                         <child>
                           <object class="GtkButton" id="first_button">
@@ -384,48 +392,60 @@
                       </object>
                     </child>
                     <child>
-                      <object class="GtkFrame">
-                        <property name="height-request">200</property>
+                      <object class="GtkScrolledWindow">
+                        <property name="has-frame">True</property>
                         <property name="hexpand">True</property>
                         <property name="vexpand">True</property>
                         <child>
-                          <object class="AdwToastOverlay" id="toast_overlay">
+                          <object class="GtkTextView" id="textview">
                             <property name="hexpand">True</property>
+                            <property name="left-margin">10</property>
+                            <property name="pixels-below-lines">10</property>
+                            <property name="pixels-inside-wrap">10</property>
+                            <property name="right-margin">10</property>
+                            <property name="top-margin">10</property>
                             <property name="vexpand">True</property>
-                            <child>
-                              <object class="GtkScrolledWindow">
-                                <property name="has-frame">True</property>
-                                <property name="hexpand">True</property>
-                                <property name="vexpand">True</property>
-                                <child>
-                                  <object class="GtkTextView" id="textview">
-                                    <property name="hexpand">True</property>
-                                    <property name="vexpand">True</property>
-                                    <property name="wrap-mode">word-char</property>
-                                  </object>
-                                </child>
-                              </object>
-                            </child>
+                            <property name="wrap-mode">word-char</property>
                           </object>
                         </child>
                       </object>
                     </child>
                     <child>
-                      <object class="AdwButtonRow" id="save_button">
-                        <property name="start-icon-name">document-save</property>
-                        <property name="title">Save</property>
+                      <object class="GtkButton" id="save_button">
+                        <property name="action-name">win.save_journal</property>
+                        <property name="label">Save</property>
                       </object>
+                    </child>
+                    <child>
+                      <object class="AdwToastOverlay" id="toast_overlay_editor"/>
                     </child>
                   </object>
                 </property>
               </object>
             </child>
           </object>
+        </property>
+        <child type="top">
+          <object class="AdwHeaderBar">
+            <property name="centering-policy">strict</property>
+            <property name="title-widget">
+              <object class="AdwWindowTitle" id="window_title">
+                <property name="subtitle">An encrypted daily journal</property>
+                <property name="title">Journal</property>
+              </object>
+            </property>
+            <child type="end">
+              <object class="GtkMenuButton">
+                <property name="icon-name">open-menu-symbolic</property>
+                <property name="menu-model">primary_menu</property>
+                <property name="primary">true</property>
+                <property name="tooltip-text" translatable="yes">Main Menu</property>
+              </object>
+            </child>
+          </object>
         </child>
       </object>
     </property>
-    <property name="default-height">700</property>
-    <property name="default-width">500</property>
   </template>
   <menu id="primary_menu">
     <section>
