@@ -62,6 +62,7 @@ class JournalWindow(Adw.ApplicationWindow):
     new_page_box = Gtk.Template.Child()
     open_page_box = Gtk.Template.Child()
     editor_page_box = Gtk.Template.Child()
+    back_button = Gtk.Template.Child()
 
 
     def __init__(self, **kwargs):
@@ -73,6 +74,11 @@ class JournalWindow(Adw.ApplicationWindow):
 
         # open stack to its initial page
         self.stack.set_visible_child(self.new_open_button_box)
+
+        # 'Back' action
+        back_action = Gio.SimpleAction.new("back_button", None)
+        back_action.connect("activate", self.on_back_action)
+        self.add_action(back_action)
 
         # 'New' journal action
         new_journal_action = Gio.SimpleAction.new("new_journal", None)
@@ -150,14 +156,25 @@ class JournalWindow(Adw.ApplicationWindow):
         self.date = self.calendar.get_date()
 
 
+    def on_back_action(self, action, parameters=None):
+        """Respond to the Back button being clicked."""
+        self.back_button.set_sensitive(False)
+        self.back_button.set_visible(False)
+        self.stack.set_visible_child(self.new_open_button_box)
+
+
     def on_new_journal_action(self, action, parameters=None):
         """Respond to the New [journal] button being clicked."""
         self.stack.set_visible_child(self.new_page_box)
+        self.back_button.set_sensitive(True)
+        self.back_button.set_visible(True)
 
 
     def on_open_existing_journal_action(self, action, parameters=None):
         """Respond to the Open [existing journal] button being clicked."""
         self.stack.set_visible_child(self.open_page_box)
+        self.back_button.set_sensitive(True)
+        self.back_button.set_visible(True)
 
 
     def on_first_action(self, action, parameters=None):
@@ -480,7 +497,6 @@ class JournalWindow(Adw.ApplicationWindow):
         """Respond to request to save a journal."""
         if self.journal is not None:
             if self.textview.get_buffer().get_modified():
-                print('on_save_journal_action')
                 buffer = self.textview.get_buffer()
                 journal_entry = buffer.get_text(buffer.get_start_iter(), buffer.get_end_iter(), True)
                 self.journal.add_entry(self.calendar.get_date(), journal_entry)

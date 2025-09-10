@@ -413,6 +413,7 @@
                     <child>
                       <object class="GtkButton" id="save_button">
                         <property name="action-name">win.save_journal</property>
+                        <property name="css-classes">suggested-action</property>
                         <property name="label">Save</property>
                       </object>
                     </child>
@@ -440,6 +441,14 @@
                 <property name="menu-model">primary_menu</property>
                 <property name="primary">true</property>
                 <property name="tooltip-text" translatable="yes">Main Menu</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="back_button">
+                <property name="action-name">win.back_button</property>
+                <property name="icon-name">go-previous-symbolic</property>
+                <property name="sensitive">False</property>
+                <property name="visible">False</property>
               </object>
             </child>
           </object>
