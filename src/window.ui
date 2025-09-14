@@ -356,8 +356,12 @@
                           <object class="GtkBox" id="editor_page_box">
                             <property name="orientation">vertical</property>
                             <child>
-                              <object class="GtkCalendar" id="calendar">
-                                <property name="hexpand">True</property>
+                              <object class="AdwClamp">
+                                <child>
+                                  <object class="GtkCalendar" id="calendar">
+                                    <property name="hexpand">True</property>
+                                  </object>
+                                </child>
                               </object>
                             </child>
                             <child>
