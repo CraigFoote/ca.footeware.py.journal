@@ -59,7 +59,7 @@ class JournalApplication(Adw.Application):
                                 version='1.4.0',
                                 issue_url='https://github.com/CraigFoote/ca.footeware.py.journal/issues',
                                 license_type=Gtk.License.GPL_3_0,
-                                support_url='https://github.com/CraigFoote/ca.footeware.py.journal',
+                                website='https://github.com/CraigFoote/ca.footeware.py.journal',
                                 developers=['Craig Foote https://footeware.ca'],
                                 copyright='© 2025 Craig Foote')
         # Translators: Replace "translator-credits" with your name/username, and optionally an email or URL.

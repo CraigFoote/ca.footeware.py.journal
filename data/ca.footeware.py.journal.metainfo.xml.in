@@ -7,7 +7,7 @@
   <name>Journal</name>
   <summary>An encrypted daily journal.</summary>
   <description>
-    <p>Password-encrypted files and navigable via built-in calendar.</p>
+    <p>Password-encrypted files navigable via built-in calendar.</p>
   </description>
 
   <developer id="tld.vendor">
@@ -38,7 +38,7 @@
      If this is present, appstreamcli compose will pull icons, keywords and categories from the desktop file. -->
   <launchable type="desktop-id">ca.footeware.py.journal.desktop</launchable>
   <!-- Use the OARS website (https://hughsie.github.io/oars/generate.html) to generate these and make sure to use oars-1.1 -->
-  <content_rating type="oars-1.1" />
+  <content_rating type="oars-1.1"/>
 
   <!-- Applications should set a brand color in both light and dark variants like so -->
   <branding>
@@ -48,19 +48,30 @@
 
   <screenshots>
     <screenshot type="default">
-      <image>https://github.com/CraigFoote/ca.footeware.py.journal/blob/master/data/screenshot.png?raw=true</image>
-      <caption>Journal window</caption>
+      <image>https://github.com/CraigFoote/ca.footeware.py.journal/blob/master/data/screenshot1.png?raw=true</image>
+      <caption>Initial Journal window</caption>
+    </screenshot>
+    <screenshot type="default">
+      <image>https://github.com/CraigFoote/ca.footeware.py.journal/blob/master/data/screenshot2.png?raw=true</image>
+      <caption>New Journal window</caption>
+    </screenshot>
+    <screenshot type="default">
+      <image>https://github.com/CraigFoote/ca.footeware.py.journal/blob/master/data/screenshot3.png?raw=true</image>
+      <caption>Open Journal window</caption>
+    </screenshot>
+    <screenshot type="default">
+      <image>https://github.com/CraigFoote/ca.footeware.py.journal/blob/master/data/screenshot4.png?raw=true</image>
+      <caption>Journal editor window</caption>
     </screenshot>
   </screenshots>
 
   <releases>
-    <release version="1.0.1" date="2024-01-18">
-      <url type="details">https://example.org/changelog.html#version_1.0.1</url>
+    <release version="1.4.0" date="2025-09-14">
+      <url type="details">https://github.com/CraigFoote/ca.footeware.py.journal/releases</url>
       <description translate="no">
-        <p>Release description</p>
+        <p>Redesign with GtkStack.</p>
         <ul>
-          <li>List of changes</li>
-          <li>List of changes</li>
+          <li>Creation of a new or opening an existing journal now done with dedicated pages, not cluttering up the editor.</li>
         </ul>
       </description>
     </release>
