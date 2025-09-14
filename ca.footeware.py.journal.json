@@ -38,7 +38,7 @@
       ]
     },
     {
-      "name": "journal",
+      "name": "Journal",
       "builddir": true,
       "buildsystem": "meson",
       "sources": [
