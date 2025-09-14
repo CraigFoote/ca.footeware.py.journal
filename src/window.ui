@@ -12,449 +12,437 @@
   <template class="JournalWindow" parent="AdwApplicationWindow">
     <property name="content">
       <object class="AdwToolbarView">
-        <property name="content">
-          <object class="GtkStack" id="stack">
+        <child>
+          <object class="GtkBox">
             <property name="hexpand">True</property>
-            <property name="transition-type">slide-up</property>
+            <property name="orientation">vertical</property>
             <property name="vexpand">True</property>
-            <child>
-              <object class="GtkStackPage" id="new_open_page">
-                <property name="child">
-                  <object class="GtkBox" id="new_open_button_box">
-                    <property name="halign">center</property>
-                    <property name="margin-bottom">20</property>
-                    <property name="margin-end">20</property>
-                    <property name="margin-start">20</property>
-                    <property name="margin-top">20</property>
-                    <property name="orientation">vertical</property>
-                    <property name="spacing">20</property>
-                    <property name="valign">center</property>
-                    <child>
-                      <object class="GtkImage">
-                        <property name="height-request">200</property>
-                        <property name="margin-bottom">20</property>
-                        <property name="resource">/ca/footeware/py/journal/icons/journal.svg</property>
-                        <property name="width-request">200</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkButton" id="new_button">
-                        <property name="action-name">win.new_journal</property>
-                        <property name="halign">center</property>
-                        <property name="hexpand">True</property>
-                        <property name="label">New</property>
-                        <property name="tooltip-text">Create a new journal</property>
-                        <property name="valign">center</property>
-                        <property name="width-request">200</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkButton" id="open_existing_button">
-                        <property name="action-name">win.open_existing_journal</property>
-                        <property name="halign">center</property>
-                        <property name="hexpand">True</property>
-                        <property name="label">Open</property>
-                        <property name="tooltip-text">Open an existing journal</property>
-                        <property name="valign">center</property>
-                        <property name="width-request">200</property>
-                      </object>
-                    </child>
+            <child type="top">
+              <object class="AdwHeaderBar">
+                <property name="centering-policy">strict</property>
+                <property name="title-widget">
+                  <object class="AdwWindowTitle" id="window_title">
+                    <property name="subtitle">An encrypted daily journal</property>
+                    <property name="title">Journal</property>
                   </object>
                 </property>
+                <child type="end">
+                  <object class="GtkMenuButton">
+                    <property name="icon-name">open-menu-symbolic</property>
+                    <property name="menu-model">primary_menu</property>
+                    <property name="primary">true</property>
+                    <property name="tooltip-text" translatable="yes">Main Menu</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkButton" id="back_button">
+                    <property name="action-name">win.back_button</property>
+                    <property name="icon-name">go-previous-symbolic</property>
+                    <property name="sensitive">False</property>
+                    <property name="tooltip-text">Back</property>
+                    <property name="visible">False</property>
+                  </object>
+                </child>
               </object>
             </child>
             <child>
-              <object class="GtkStackPage" id="new_page">
-                <property name="child">
-                  <object class="GtkGrid" id="new_page_box">
-                    <property name="column-spacing">20</property>
-                    <property name="margin-bottom">20</property>
-                    <property name="margin-end">20</property>
-                    <property name="margin-start">20</property>
-                    <property name="margin-top">20</property>
-                    <property name="row-spacing">20</property>
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="css-classes">heading</property>
+              <object class="GtkStack" id="stack">
+                <property name="hexpand">True</property>
+                <property name="transition-type">slide-up</property>
+                <property name="vexpand">True</property>
+                <child>
+                  <object class="GtkStackPage" id="new_open_page">
+                    <property name="child">
+                      <object class="GtkBox" id="new_open_button_box">
                         <property name="halign">center</property>
-                        <property name="justify">center</property>
-                        <property name="label">Create a new journal.</property>
                         <property name="margin-bottom">20</property>
-                        <property name="use-markup">True</property>
-                        <property name="valign">center</property>
-                        <property name="xalign">-0.0</property>
-                        <property name="yalign">0.0</property>
-                        <layout>
-                          <property name="column">0</property>
-                          <property name="column-span">3</property>
-                          <property name="row">0</property>
-                        </layout>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="halign">end</property>
-                        <property name="label">Folder</property>
-                        <layout>
-                          <property name="column">0</property>
-                          <property name="row">1</property>
-                        </layout>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkEntry" id="new_journal_location">
-                        <property name="can-focus">false</property>
-                        <property name="editable">false</property>
-                        <property name="has-frame">true</property>
-                        <property name="hexpand">true</property>
-                        <property name="placeholder-text">Browse for new journal location</property>
-                        <layout>
-                          <property name="column">1</property>
-                          <property name="row">1</property>
-                        </layout>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkButton">
-                        <property name="action-name">win.new_browse_for_folder</property>
-                        <property name="label">Browse</property>
-                        <layout>
-                          <property name="column">2</property>
-                          <property name="row">1</property>
-                        </layout>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="halign">end</property>
-                        <property name="label">Journal Name</property>
-                        <layout>
-                          <property name="column">0</property>
-                          <property name="row">2</property>
-                        </layout>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkEntry" id="new_journal_name">
-                        <property name="has-frame">true</property>
-                        <property name="hexpand">true</property>
-                        <property name="placeholder-text">New journal name</property>
-                        <layout>
-                          <property name="column">1</property>
-                          <property name="column-span">2</property>
-                          <property name="row">2</property>
-                        </layout>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="halign">end</property>
-                        <property name="label">Password</property>
-                        <layout>
-                          <property name="column">0</property>
-                          <property name="row">3</property>
-                        </layout>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkPasswordEntry" id="new_journal_password_1">
-                        <property name="hexpand">true</property>
-                        <layout>
-                          <property name="column">1</property>
-                          <property name="column-span">2</property>
-                          <property name="row">3</property>
-                        </layout>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="halign">end</property>
-                        <property name="label">Password Again</property>
-                        <layout>
-                          <property name="column">0</property>
-                          <property name="row">4</property>
-                        </layout>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkPasswordEntry" id="new_journal_password_2">
-                        <property name="hexpand">true</property>
-                        <layout>
-                          <property name="column">1</property>
-                          <property name="column-span">2</property>
-                          <property name="row">4</property>
-                        </layout>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkButton" id="create_journal_button">
-                        <property name="action-name">win.create_journal</property>
-                        <property name="halign">end</property>
-                        <property name="label">Create Journal</property>
-                        <layout>
-                          <property name="column">0</property>
-                          <property name="column-span">3</property>
-                          <property name="row">5</property>
-                        </layout>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkImage">
-                        <property name="height-request">100</property>
+                        <property name="margin-end">20</property>
+                        <property name="margin-start">20</property>
                         <property name="margin-top">20</property>
-                        <property name="resource">/ca/footeware/py/journal/icons/key.svg</property>
-                        <layout>
-                          <property name="column">0</property>
-                          <property name="column-span">3</property>
-                          <property name="row">6</property>
-                        </layout>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="AdwToastOverlay" id="toast_overlay_new">
-                        <property name="hexpand">True</property>
-                        <property name="vexpand">True</property>
-                        <layout>
-                          <property name="column">0</property>
-                          <property name="column-span">3</property>
-                          <property name="row">7</property>
-                        </layout>
-                      </object>
-                    </child>
-                  </object>
-                </property>
-              </object>
-            </child>
-            <child>
-              <object class="GtkStackPage" id="open_page">
-                <property name="child">
-                  <object class="GtkGrid" id="open_page_box">
-                    <property name="column-spacing">15</property>
-                    <property name="margin-bottom">20</property>
-                    <property name="margin-end">20</property>
-                    <property name="margin-start">20</property>
-                    <property name="margin-top">20</property>
-                    <property name="row-spacing">15</property>
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="css-classes">heading</property>
-                        <property name="halign">center</property>
-                        <property name="justify">center</property>
-                        <property name="label">Open an existing journal.</property>
-                        <property name="margin-bottom">20</property>
-                        <property name="use-markup">True</property>
-                        <property name="xalign">-0.0</property>
-                        <property name="yalign">0.0</property>
-                        <layout>
-                          <property name="column">0</property>
-                          <property name="column-span">3</property>
-                          <property name="row">0</property>
-                        </layout>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="halign">end</property>
-                        <property name="label">Journal</property>
-                        <layout>
-                          <property name="column">0</property>
-                          <property name="row">1</property>
-                        </layout>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkEntry" id="existing_journal_location">
-                        <property name="can-focus">false</property>
-                        <property name="editable">false</property>
-                        <property name="has-frame">true</property>
-                        <property name="hexpand">true</property>
-                        <property name="placeholder-text">Browse for journal</property>
-                        <layout>
-                          <property name="column">1</property>
-                          <property name="row">1</property>
-                        </layout>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkButton">
-                        <property name="action-name">win.open_browse_for_journal</property>
-                        <property name="label">Browse</property>
-                        <layout>
-                          <property name="column">2</property>
-                          <property name="row">1</property>
-                        </layout>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="halign">end</property>
-                        <property name="label">Password</property>
-                        <layout>
-                          <property name="column">0</property>
-                          <property name="row">2</property>
-                        </layout>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkPasswordEntry" id="existing_journal_password">
-                        <property name="hexpand">true</property>
-                        <layout>
-                          <property name="column">1</property>
-                          <property name="column-span">2</property>
-                          <property name="row">2</property>
-                        </layout>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkButton">
-                        <property name="action-name">win.open_journal</property>
-                        <property name="halign">end</property>
-                        <property name="label">Open Journal</property>
-                        <layout>
-                          <property name="column">0</property>
-                          <property name="column-span">3</property>
-                          <property name="row">3</property>
-                        </layout>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkImage">
-                        <property name="height-request">100</property>
-                        <property name="margin-top">20</property>
-                        <property name="resource">/ca/footeware/py/journal/icons/key.svg</property>
-                        <layout>
-                          <property name="column">0</property>
-                          <property name="column-span">3</property>
-                          <property name="row">4</property>
-                        </layout>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="AdwToastOverlay" id="toast_overlay_open">
-                        <property name="hexpand">True</property>
-                        <property name="vexpand">True</property>
-                        <layout>
-                          <property name="column">0</property>
-                          <property name="column-span">3</property>
-                          <property name="row">5</property>
-                        </layout>
-                      </object>
-                    </child>
-                  </object>
-                </property>
-              </object>
-            </child>
-            <child>
-              <object class="GtkStackPage" id="editor_page">
-                <property name="child">
-                  <object class="GtkBox" id="editor_page_box">
-                    <property name="orientation">vertical</property>
-                    <child>
-                      <object class="GtkCalendar" id="calendar">
-                        <property name="hexpand">True</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkBox">
-                        <property name="halign">center</property>
-                        <property name="hexpand">True</property>
-                        <property name="homogeneous">True</property>
-                        <property name="margin-bottom">10</property>
-                        <property name="margin-end">10</property>
-                        <property name="margin-start">10</property>
-                        <property name="margin-top">10</property>
-                        <property name="spacing">5</property>
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">20</property>
+                        <property name="valign">center</property>
                         <child>
-                          <object class="GtkButton" id="first_button">
-                            <property name="action-name">win.first</property>
-                            <property name="label">First</property>
+                          <object class="GtkImage">
+                            <property name="height-request">200</property>
+                            <property name="margin-bottom">20</property>
+                            <property name="resource">/ca/footeware/py/journal/icons/journal.svg</property>
+                            <property name="width-request">200</property>
                           </object>
                         </child>
                         <child>
-                          <object class="GtkButton" id="previous_button">
-                            <property name="action-name">win.previous</property>
-                            <property name="label">Previous</property>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkButton" id="today_button">
-                            <property name="action-name">win.today</property>
-                            <property name="label">Today</property>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkButton" id="next_button">
-                            <property name="action-name">win.next</property>
-                            <property name="label">Next</property>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkButton" id="last_button">
-                            <property name="action-name">win.last</property>
-                            <property name="label">Last</property>
-                          </object>
-                        </child>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkScrolledWindow">
-                        <property name="has-frame">True</property>
-                        <property name="hexpand">True</property>
-                        <property name="vexpand">True</property>
-                        <child>
-                          <object class="GtkTextView" id="textview">
+                          <object class="GtkButton" id="new_button">
+                            <property name="action-name">win.new_journal</property>
+                            <property name="halign">center</property>
                             <property name="hexpand">True</property>
-                            <property name="left-margin">10</property>
-                            <property name="pixels-below-lines">10</property>
-                            <property name="pixels-inside-wrap">10</property>
-                            <property name="right-margin">10</property>
-                            <property name="top-margin">10</property>
-                            <property name="vexpand">True</property>
-                            <property name="wrap-mode">word-char</property>
+                            <property name="label">New</property>
+                            <property name="tooltip-text">Create a new journal</property>
+                            <property name="valign">center</property>
+                            <property name="width-request">200</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="open_existing_button">
+                            <property name="action-name">win.open_existing_journal</property>
+                            <property name="halign">center</property>
+                            <property name="hexpand">True</property>
+                            <property name="label">Open</property>
+                            <property name="tooltip-text">Open an existing journal</property>
+                            <property name="valign">center</property>
+                            <property name="width-request">200</property>
                           </object>
                         </child>
                       </object>
-                    </child>
-                    <child>
-                      <object class="AdwToastOverlay" id="toast_overlay_editor"/>
-                    </child>
-                    <child>
-                      <object class="GtkButton" id="save_button">
-                        <property name="action-name">win.save_journal</property>
-                        <property name="css-classes">suggested-action</property>
-                        <property name="label">Save</property>
-                      </object>
-                    </child>
+                    </property>
                   </object>
-                </property>
-              </object>
-            </child>
-          </object>
-        </property>
-        <child type="top">
-          <object class="AdwHeaderBar">
-            <property name="centering-policy">strict</property>
-            <property name="title-widget">
-              <object class="AdwWindowTitle" id="window_title">
-                <property name="subtitle">An encrypted daily journal</property>
-                <property name="title">Journal</property>
-              </object>
-            </property>
-            <child type="end">
-              <object class="GtkMenuButton">
-                <property name="icon-name">open-menu-symbolic</property>
-                <property name="menu-model">primary_menu</property>
-                <property name="primary">true</property>
-                <property name="tooltip-text" translatable="yes">Main Menu</property>
+                </child>
+                <child>
+                  <object class="GtkStackPage" id="new_page">
+                    <property name="child">
+                      <object class="GtkGrid" id="new_page_box">
+                        <property name="column-spacing">20</property>
+                        <property name="margin-bottom">20</property>
+                        <property name="margin-end">20</property>
+                        <property name="margin-start">20</property>
+                        <property name="margin-top">20</property>
+                        <property name="row-spacing">20</property>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="css-classes">heading</property>
+                            <property name="halign">center</property>
+                            <property name="justify">center</property>
+                            <property name="label">Create a new journal.</property>
+                            <property name="margin-bottom">20</property>
+                            <property name="use-markup">True</property>
+                            <property name="valign">center</property>
+                            <property name="xalign">-0.0</property>
+                            <property name="yalign">0.0</property>
+                            <layout>
+                              <property name="column">0</property>
+                              <property name="column-span">3</property>
+                              <property name="row">0</property>
+                            </layout>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="halign">end</property>
+                            <property name="label">Folder</property>
+                            <layout>
+                              <property name="column">0</property>
+                              <property name="row">1</property>
+                            </layout>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkEntry" id="new_journal_location">
+                            <property name="can-focus">false</property>
+                            <property name="editable">false</property>
+                            <property name="has-frame">true</property>
+                            <property name="hexpand">true</property>
+                            <property name="placeholder-text">Browse for new journal location</property>
+                            <layout>
+                              <property name="column">1</property>
+                              <property name="row">1</property>
+                            </layout>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkButton">
+                            <property name="action-name">win.new_browse_for_folder</property>
+                            <property name="label">Browse</property>
+                            <layout>
+                              <property name="column">2</property>
+                              <property name="row">1</property>
+                            </layout>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="halign">end</property>
+                            <property name="label">Journal Name</property>
+                            <layout>
+                              <property name="column">0</property>
+                              <property name="row">2</property>
+                            </layout>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkEntry" id="new_journal_name">
+                            <property name="has-frame">true</property>
+                            <property name="hexpand">true</property>
+                            <property name="placeholder-text">New journal name</property>
+                            <layout>
+                              <property name="column">1</property>
+                              <property name="column-span">2</property>
+                              <property name="row">2</property>
+                            </layout>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="halign">end</property>
+                            <property name="label">Password</property>
+                            <layout>
+                              <property name="column">0</property>
+                              <property name="row">3</property>
+                            </layout>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkPasswordEntry" id="new_journal_password_1">
+                            <property name="hexpand">true</property>
+                            <layout>
+                              <property name="column">1</property>
+                              <property name="column-span">2</property>
+                              <property name="row">3</property>
+                            </layout>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="halign">end</property>
+                            <property name="label">Password Again</property>
+                            <layout>
+                              <property name="column">0</property>
+                              <property name="row">4</property>
+                            </layout>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkPasswordEntry" id="new_journal_password_2">
+                            <property name="hexpand">true</property>
+                            <layout>
+                              <property name="column">1</property>
+                              <property name="column-span">2</property>
+                              <property name="row">4</property>
+                            </layout>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="create_journal_button">
+                            <property name="action-name">win.create_journal</property>
+                            <property name="halign">end</property>
+                            <property name="label">Create Journal</property>
+                            <layout>
+                              <property name="column">0</property>
+                              <property name="column-span">3</property>
+                              <property name="row">5</property>
+                            </layout>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkImage">
+                            <property name="height-request">100</property>
+                            <property name="margin-top">20</property>
+                            <property name="resource">/ca/footeware/py/journal/icons/key.svg</property>
+                            <layout>
+                              <property name="column">0</property>
+                              <property name="column-span">3</property>
+                              <property name="row">6</property>
+                            </layout>
+                          </object>
+                        </child>
+                      </object>
+                    </property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkStackPage" id="open_page">
+                    <property name="child">
+                      <object class="GtkGrid" id="open_page_box">
+                        <property name="column-spacing">15</property>
+                        <property name="margin-bottom">20</property>
+                        <property name="margin-end">20</property>
+                        <property name="margin-start">20</property>
+                        <property name="margin-top">20</property>
+                        <property name="row-spacing">15</property>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="css-classes">heading</property>
+                            <property name="halign">center</property>
+                            <property name="justify">center</property>
+                            <property name="label">Open an existing journal.</property>
+                            <property name="margin-bottom">20</property>
+                            <property name="use-markup">True</property>
+                            <property name="xalign">-0.0</property>
+                            <property name="yalign">0.0</property>
+                            <layout>
+                              <property name="column">0</property>
+                              <property name="column-span">3</property>
+                              <property name="row">0</property>
+                            </layout>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="halign">end</property>
+                            <property name="label">Journal</property>
+                            <layout>
+                              <property name="column">0</property>
+                              <property name="row">1</property>
+                            </layout>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkEntry" id="existing_journal_location">
+                            <property name="can-focus">false</property>
+                            <property name="editable">false</property>
+                            <property name="has-frame">true</property>
+                            <property name="hexpand">true</property>
+                            <property name="placeholder-text">Browse for journal</property>
+                            <layout>
+                              <property name="column">1</property>
+                              <property name="row">1</property>
+                            </layout>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkButton">
+                            <property name="action-name">win.open_browse_for_journal</property>
+                            <property name="label">Browse</property>
+                            <layout>
+                              <property name="column">2</property>
+                              <property name="row">1</property>
+                            </layout>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="halign">end</property>
+                            <property name="label">Password</property>
+                            <layout>
+                              <property name="column">0</property>
+                              <property name="row">2</property>
+                            </layout>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkPasswordEntry" id="existing_journal_password">
+                            <property name="hexpand">true</property>
+                            <layout>
+                              <property name="column">1</property>
+                              <property name="column-span">2</property>
+                              <property name="row">2</property>
+                            </layout>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkButton">
+                            <property name="action-name">win.open_journal</property>
+                            <property name="halign">end</property>
+                            <property name="label">Open Journal</property>
+                            <layout>
+                              <property name="column">0</property>
+                              <property name="column-span">3</property>
+                              <property name="row">3</property>
+                            </layout>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkImage">
+                            <property name="height-request">100</property>
+                            <property name="margin-top">20</property>
+                            <property name="resource">/ca/footeware/py/journal/icons/key.svg</property>
+                            <layout>
+                              <property name="column">0</property>
+                              <property name="column-span">3</property>
+                              <property name="row">4</property>
+                            </layout>
+                          </object>
+                        </child>
+                      </object>
+                    </property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkStackPage" id="editor_page">
+                    <property name="child">
+                      <object class="GtkBox" id="editor_page_box">
+                        <property name="orientation">vertical</property>
+                        <child>
+                          <object class="GtkCalendar" id="calendar">
+                            <property name="hexpand">True</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkBox">
+                            <property name="halign">center</property>
+                            <property name="hexpand">True</property>
+                            <property name="homogeneous">True</property>
+                            <property name="margin-bottom">10</property>
+                            <property name="margin-end">10</property>
+                            <property name="margin-start">10</property>
+                            <property name="margin-top">10</property>
+                            <property name="spacing">5</property>
+                            <child>
+                              <object class="GtkButton" id="first_button">
+                                <property name="action-name">win.first</property>
+                                <property name="label">First</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkButton" id="previous_button">
+                                <property name="action-name">win.previous</property>
+                                <property name="label">Previous</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkButton" id="today_button">
+                                <property name="action-name">win.today</property>
+                                <property name="label">Today</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkButton" id="next_button">
+                                <property name="action-name">win.next</property>
+                                <property name="label">Next</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkButton" id="last_button">
+                                <property name="action-name">win.last</property>
+                                <property name="label">Last</property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkScrolledWindow">
+                            <property name="has-frame">True</property>
+                            <property name="hexpand">True</property>
+                            <property name="vexpand">True</property>
+                            <child>
+                              <object class="GtkTextView" id="textview">
+                                <property name="hexpand">True</property>
+                                <property name="left-margin">10</property>
+                                <property name="pixels-below-lines">10</property>
+                                <property name="pixels-inside-wrap">10</property>
+                                <property name="right-margin">10</property>
+                                <property name="top-margin">10</property>
+                                <property name="vexpand">True</property>
+                                <property name="wrap-mode">word-char</property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="save_button">
+                            <property name="action-name">win.save_journal</property>
+                            <property name="css-classes">suggested-action</property>
+                            <property name="label">Save</property>
+                          </object>
+                        </child>
+                      </object>
+                    </property>
+                  </object>
+                </child>
               </object>
             </child>
             <child>
-              <object class="GtkButton" id="back_button">
-                <property name="action-name">win.back_button</property>
-                <property name="icon-name">go-previous-symbolic</property>
-                <property name="sensitive">False</property>
-                <property name="tooltip-text">Back</property>
-                <property name="visible">False</property>
+              <object class="AdwToastOverlay" id="toaster">
+                <property name="height-request">1</property>
+                <property name="hexpand">True</property>
               </object>
             </child>
           </object>

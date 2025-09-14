@@ -52,9 +52,7 @@ class JournalWindow(Adw.ApplicationWindow):
     next_button = Gtk.Template.Child()
     last_button = Gtk.Template.Child()
     save_button = Gtk.Template.Child()
-    toast_overlay_new = Gtk.Template.Child()
-    toast_overlay_open = Gtk.Template.Child()
-    toast_overlay_editor = Gtk.Template.Child()
+    toaster = Gtk.Template.Child()
     window_title = Gtk.Template.Child()
     stack = Gtk.Template.Child()
     new_open_button_box = Gtk.Template.Child()
@@ -362,7 +360,7 @@ class JournalWindow(Adw.ApplicationWindow):
                 journal_entry = buffer.get_text(buffer.get_start_iter(), buffer.get_end_iter(), True)
                 self.journal.add_entry(self.old_date, journal_entry) # saves
                 self.mark_calendar_days()
-                self.toast_overlay_editor.add_toast(Adw.Toast.new("Journal saved"))
+                self.toaster.add_toast(Adw.Toast.new("Journal saved"))
             date_str = self.calendar.get_date()
             if date_str in self.journal.get_keys():
                 journal_entry = self.journal.get_entry(date_str)
@@ -397,7 +395,7 @@ class JournalWindow(Adw.ApplicationWindow):
         password_2 = self.new_journal_password_2.get_text() # do not trim whitespace
         if location != '' and journal_name != '' and password_1 != '' and password_2 != '':
             if password_1 != password_2:
-                self.toast_overlay_new.add_toast(Adw.Toast.new("Passwords don't match"))
+                self.toaster.add_toast(Adw.Toast.new("Passwords don't match"))
             else:
                 file_path = os.path.join(location, journal_name)
                 self.password = password_1
@@ -484,7 +482,7 @@ class JournalWindow(Adw.ApplicationWindow):
                 self.back_button.set_visible(False)
                 self.stack.set_visible_child(self.editor_page_box)
             except InvalidToken as e:
-                self.toast_overlay_open.add_toast(Adw.Toast.new("'InvalidToken' error. Is the password correct?"))
+                self.toaster.add_toast(Adw.Toast.new("'InvalidToken' error. Is the password correct?"))
 
 
     def mark_calendar_days(self):
@@ -507,7 +505,7 @@ class JournalWindow(Adw.ApplicationWindow):
                 self.mark_calendar_days()
                 buffer.set_modified(False)
                 self.window_title.set_title('Journal')
-                self.toast_overlay_editor.add_toast(Adw.Toast.new("Journal saved"))
+                self.toaster.add_toast(Adw.Toast.new("Journal saved"))
 
 
     def on_buffer_changed(self, buffer):
