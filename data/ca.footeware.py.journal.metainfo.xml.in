@@ -5,34 +5,21 @@
   <project_license>GPL-3.0-or-later</project_license>
 
   <name>Journal</name>
-  <summary>An encrypted daily journal.</summary>
+  <summary>An encrypted daily journal</summary>
   <description>
-    <p>Password-encrypted files navigable via built-in calendar.</p>
+    <p>Stores password-encrypted files that are navigable via application's built-in calendar.</p>
   </description>
 
   <developer id="tld.vendor">
     <name>Craig Foote</name>
   </developer>
 
-  <!-- Required: Should be a link to the upstream homepage for the component -->
-  <url type="homepage">https://footeware.ca</url>
   <!-- Recommended: It is highly recommended for open-source projects to display the source code repository -->
   <url type="vcs-browser">https://github.com/CraigFoote/ca.footeware.py.journal</url>
   <!-- Should point to the software's bug tracking system, for users to report new bugs -->
   <url type="bugtracker">https://github.com/CraigFoote/ca.footeware.py.journal/issues</url>
   <!-- Should link a FAQ page for this software, to answer some of the most-asked questions in detail -->
   <!-- URLs of this type should point to a webpage where users can submit or modify translations of the upstream project -->
-  <url type="translate">https://example.org/translate</url>
-  <url type="faq">https://example.org/faq</url>
-  <!-- Should provide a web link to an online user's reference, a software manual or help page -->
-  <url type="help">https://example.org/help</url>
-  <!-- URLs of this type should point to a webpage showing information on how to donate to the described software project -->
-  <url type="donation">https://example.org/donate</url>
-  <!-- This could for example be an HTTPS URL to an online form or a page describing how to contact the developer -->
-  <url type="contact">https://example.org/contact</url>
-  <!-- URLs of this type should point to a webpage showing information on how to contribute to the described software project -->
-  <url type="contribute">https://example.org/contribute</url>
-
   <translation type="gettext">journal</translation>
   <!-- All graphical applications having a desktop file must have this tag in the MetaInfo.
      If this is present, appstreamcli compose will pull icons, keywords and categories from the desktop file. -->
@@ -66,7 +53,7 @@
   </screenshots>
 
   <releases>
-    <release version="1.4.0" date="2025-09-14">
+    <release version="1.5.0" date="2025-09-14">
       <url type="details">https://github.com/CraigFoote/ca.footeware.py.journal/releases</url>
       <description translate="no">
         <p>Redesign with GtkStack.</p>
