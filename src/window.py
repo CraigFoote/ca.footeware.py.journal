@@ -1,3 +1,7 @@
+"""
+The main application window.
+"""
+
 # window.py
 #
 # Copyright 2025 Craig Foote
@@ -17,19 +21,19 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 import os
+import base64
 import gi
-gi.require_version('Gtk', '4.0')
+import jprops
+
 gi.require_version('Adw', '1')
-from gi.repository import Adw
-from gi.repository import Gtk
-from gi.repository import Gio
+gi.require_version('Gtk', '4.0')
+
+from gi.repository import Gtk, Gio, Adw
 from gi.repository import GLib
 from cryptography.fernet import Fernet, InvalidToken
 from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-import base64
-import jprops
+from cryptography.hazmat.primitives import hashes
 from sortedcontainers import SortedDict
 
 
@@ -73,6 +77,29 @@ class JournalWindow(Adw.ApplicationWindow):
         # open stack to its initial page
         self.stack.set_visible_child(self.new_open_button_box)
 
+        self.create_actions()
+
+        # calendar listeners
+        self.calendar.connect("day-selected", self.on_day_selected)
+        self.calendar.connect("prev-month", self.on_prev_month)
+        self.calendar.connect("next-month", self.on_next_month)
+        self.calendar.connect("prev-year", self.on_prev_year)
+        self.calendar.connect("next-year", self.on_next_year)
+
+        # textview
+        self.buffer = self.textview.get_buffer()
+        self.buffer.connect("changed", self.on_buffer_changed)
+
+        self.journal = None
+        self.date = self.calendar.get_date()
+        self.properties = {}
+        self.file_path = ''
+        self.old_date = None
+        self.password = None
+
+
+    def create_actions(self):
+        """Create the actions to accompany the action-names in the window.ui file."""
         # 'Back' action
         back_action = Gio.SimpleAction.new("back_button", None)
         back_action.connect("activate", self.on_back_action)
@@ -114,13 +141,6 @@ class JournalWindow(Adw.ApplicationWindow):
         self.get_application().set_accels_for_action("win.save_journal", ['<control>s'])
         self.add_action(save_journal_action)
 
-        # calendar listeners
-        self.calendar.connect("day-selected", self.on_day_selected)
-        self.calendar.connect("prev-month", self.on_prev_month)
-        self.calendar.connect("next-month", self.on_next_month)
-        self.calendar.connect("prev-year", self.on_prev_year)
-        self.calendar.connect("next-year", self.on_next_year)
-
         # First action
         first_action = Gio.SimpleAction.new("first", None)
         first_action.connect("activate", self.on_first_action)
@@ -146,36 +166,29 @@ class JournalWindow(Adw.ApplicationWindow):
         last_action.connect("activate", self.on_last_action)
         self.add_action(last_action)
 
-        # textview
-        self.buffer = self.textview.get_buffer()
-        self.buffer.connect("changed", self.on_buffer_changed)
 
-        self.journal = None
-        self.date = self.calendar.get_date()
-
-
-    def on_back_action(self, action, parameters=None):
+    def on_back_action(self, _, __):
         """Respond to the Back button being clicked."""
         self.back_button.set_sensitive(False)
         self.back_button.set_visible(False)
         self.stack.set_visible_child(self.new_open_button_box)
 
 
-    def on_new_journal_action(self, action, parameters=None):
+    def on_new_journal_action(self, _, __):
         """Respond to the New [journal] button being clicked."""
         self.stack.set_visible_child(self.new_page_box)
         self.back_button.set_sensitive(True)
         self.back_button.set_visible(True)
 
 
-    def on_open_existing_journal_action(self, action, parameters=None):
+    def on_open_existing_journal_action(self, _, __):
         """Respond to the Open [existing journal] button being clicked."""
         self.stack.set_visible_child(self.open_page_box)
         self.back_button.set_sensitive(True)
         self.back_button.set_visible(True)
 
 
-    def on_first_action(self, action, parameters=None):
+    def on_first_action(self, _, __):
         """Respond to the First button being clicked."""
         if self.journal is not None:
             keys = self.journal.get_keys()
@@ -186,7 +199,7 @@ class JournalWindow(Adw.ApplicationWindow):
                 self.mark_calendar_days()
 
 
-    def on_previous_action(self, action, parameters=None):
+    def on_previous_action(self, _, __):
         """Respond to the Previous button being clicked."""
         if self.journal is not None:
             current_date = self.calendar.get_date()
@@ -210,8 +223,8 @@ class JournalWindow(Adw.ApplicationWindow):
                     if current_date_str < last_key: # we don't care if it's >
                         previous_key = last_key
                     else:
-                        # if selected date has no entry and is between two entries, select earlier one
-                        # find next lower entry
+                        # If selected date has no entry and is between two entries,
+                        # select earlier one. Find next lower entry:
                         copy = list(keys).copy()
                         copy.reverse() # easier to go thru keys reversed
                         for key in list(copy):
@@ -225,15 +238,15 @@ class JournalWindow(Adw.ApplicationWindow):
                 self.mark_calendar_days()
 
 
-    def on_today_action(self, action, parameters=None):
+    def on_today_action(self, _, __):
         if self.journal is not None:
             """Respond to request to navigate to 'today' in calendar."""
             self.calendar.select_day(GLib.DateTime.new_now_local())
-            self.date = self.calendar.get_date();
+            self.date = self.calendar.get_date()
             self.mark_calendar_days()
 
 
-    def on_next_action(self, action, parameters=None):
+    def on_next_action(self, _, __):
         """Respond to the Next button being clicked."""
         if self.journal is not None and len(self.journal.get_entries()) > 0:
             current_date = self.calendar.get_date()
@@ -273,7 +286,7 @@ class JournalWindow(Adw.ApplicationWindow):
                 self.mark_calendar_days()
 
 
-    def on_last_action(self, action, parameters=None):
+    def on_last_action(self, _, __):
         """Respond to the Last button being clicked."""
         if self.journal is not None:
             keys = self.journal.get_keys()
@@ -296,28 +309,28 @@ class JournalWindow(Adw.ApplicationWindow):
         """Respond to pressing of Previous Month button."""
         if self.journal is not None:
             self.date = calendar.get_date()
-            self.mark_calendar_days();
+            self.mark_calendar_days()
 
 
     def on_next_month(self, calendar):
         """Respond to pressing of Next Month button."""
         if self.journal is not None:
             self.date = calendar.get_date()
-            self.mark_calendar_days();
+            self.mark_calendar_days()
 
 
     def on_prev_year(self, calendar):
         """Respond to pressing of Previous Year button."""
         if self.journal is not None:
             self.date = calendar.get_date()
-            self.mark_calendar_days();
+            self.mark_calendar_days()
 
 
     def on_next_year(self, calendar):
         """Respond to pressing of Next Year button."""
         if self.journal is not None:
             self.date = calendar.get_date()
-            self.mark_calendar_days();
+            self.mark_calendar_days()
 
 
     def on_day_selected(self, calendar):
@@ -357,7 +370,9 @@ class JournalWindow(Adw.ApplicationWindow):
             buffer = self.textview.get_buffer()
             if response == "save":
                 # update self.journal entry and save to file
-                journal_entry = buffer.get_text(buffer.get_start_iter(), buffer.get_end_iter(), True)
+                start_iter = buffer.get_start_iter()
+                end_iter = buffer.get_end_iter()
+                journal_entry = buffer.get_text(start_iter, end_iter, True)
                 self.journal.add_entry(self.old_date, journal_entry) # saves
                 self.mark_calendar_days()
                 self.toaster.add_toast(Adw.Toast.new("Journal saved"))
@@ -459,8 +474,6 @@ class JournalWindow(Adw.ApplicationWindow):
 
     def on_open_journal_action(self, action, parameters=None):
         """Respond to request to open a journal."""
-        self.properties = {}
-        self.file_path = ''
         file_path = self.existing_journal_location.get_text()
         self.password = self.existing_journal_password.get_text()
         if file_path != '' and self.password != '':
@@ -534,7 +547,10 @@ class JournalWindow(Adw.ApplicationWindow):
 
 
 class Journal:
-    """A map where the keys are dates in the format %Y-%m-%d and the values are textual entries."""
+    """
+    A map where the keys are dates in the format %Y-%m-%d and
+    the values are encrypted textual entries.
+    """
 
     def __init__(self, file_path, password):
         """Initialization."""
@@ -622,17 +638,17 @@ class Journal:
         """Encrypt the provided `plaintext` using provided `password`."""
         if isinstance(plaintext, str):
             plaintext = plaintext.encode("utf-8")
-        encrypted_bytes = self.cipherFernet(password.encode("utf-8")).encrypt(plaintext)
+        encrypted_bytes = self.cipher_fernet(password.encode("utf-8")).encrypt(plaintext)
         return encrypted_bytes.decode("utf-8")
 
 
     def decrypt(self, ciphertext, password):
         """Decrypt the provided `ciphertext` using provided `password`."""
-        decrypted_bytes = self.cipherFernet(password.encode("utf-8")).decrypt(ciphertext)
+        decrypted_bytes = self.cipher_fernet(password.encode("utf-8")).decrypt(ciphertext)
         return decrypted_bytes.decode("utf-8")
 
 
-    def cipherFernet(self, password):
+    def cipher_fernet(self, password):
         """Create a hairy little Fernet."""
         key = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=b'abcd', iterations=1000, backend=default_backend()).derive(password)
         return Fernet(base64.urlsafe_b64encode(key))

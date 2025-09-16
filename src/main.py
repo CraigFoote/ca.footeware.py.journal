@@ -1,3 +1,7 @@
+"""
+The application's entry point.
+"""
+
 # main.py
 #
 # Copyright 2025 Craig Foote
@@ -16,25 +20,24 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
-
 import sys
 import gi
-import os
 
 gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
 
-from gi.repository import Gtk, Gio, Gdk, GLib, Adw
+from gi.repository import Gtk, Gio, Adw
 from .window import JournalWindow
 
 
 class JournalApplication(Adw.Application):
     """The main application singleton class."""
 
-    def __init__(self):
+    def __init__(self, version):
         super().__init__(application_id='ca.footeware.py.journal',
                          flags=Gio.ApplicationFlags.DEFAULT_FLAGS,
                          resource_base_path='/ca/footeware/py/journal')
+        self.version = version
         self.create_action('quit', lambda *_: self.quit(), ['<primary>q'])
         self.create_action('about', self.on_about_action)
 
@@ -51,17 +54,18 @@ class JournalApplication(Adw.Application):
         win.present()
 
 
-    def on_about_action(self, *args):
+    def on_about_action(self, *_):
         """Callback for the app.about action."""
-        about = Adw.AboutDialog(application_name='Journal',
-                                application_icon='ca.footeware.py.journal',
-                                developer_name='Another fine mess by Footeware.ca',
-                                version='1.5.0',
-                                issue_url='https://github.com/CraigFoote/ca.footeware.py.journal/issues',
-                                license_type=Gtk.License.GPL_3_0,
-                                website='https://github.com/CraigFoote/ca.footeware.py.journal',
-                                developers=['Craig Foote https://footeware.ca'],
-                                copyright='© 2025 Craig Foote')
+        about = Adw.AboutDialog(
+                application_name='Journal',
+                application_icon='ca.footeware.py.journal',
+                developer_name='Another fine mess by Footeware.ca',
+                version=self.version,
+                issue_url='https://github.com/CraigFoote/ca.footeware.py.journal/issues',
+                license_type=Gtk.License.GPL_3_0,
+                website='https://github.com/CraigFoote/ca.footeware.py.journal',
+                developers=['Craig Foote https://footeware.ca'],
+                copyright='© 2025 Craig Foote')
         about.present(self.props.active_window)
 
 
@@ -83,6 +87,5 @@ class JournalApplication(Adw.Application):
 
 def main(version):
     """The application's entry point."""
-    app = JournalApplication()
+    app = JournalApplication(version)
     return app.run(sys.argv)
-
