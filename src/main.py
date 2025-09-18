@@ -42,7 +42,7 @@ class JournalApplication(Adw.Application):
         self.create_action('about', self.on_about_action)
 
 
-    def do_activate(self):
+    def do_activate(self, *_):
         """Called when the application is activated.
 
         We raise the application's main window, creating it if
