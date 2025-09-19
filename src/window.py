@@ -42,29 +42,31 @@ class JournalWindow(Adw.ApplicationWindow):
     """The main window class."""
     __gtype_name__ = 'JournalWindow'
 
-    calendar = Gtk.Template.Child()
-    textview = Gtk.Template.Child()
+    toaster = Gtk.Template.Child()
+    window_title = Gtk.Template.Child()
+    back_button = Gtk.Template.Child()
+    stack = Gtk.Template.Child()
+    new_button = Gtk.Template.Child()
+    open_button = Gtk.Template.Child()
+    new_open_page_box = Gtk.Template.Child()
+    new_page_box = Gtk.Template.Child()
+    open_page_box = Gtk.Template.Child()
+    editor_page_box = Gtk.Template.Child()
     new_journal_location = Gtk.Template.Child()
     new_journal_name = Gtk.Template.Child()
     new_journal_password_1 = Gtk.Template.Child()
     new_journal_password_2 = Gtk.Template.Child()
     existing_journal_location = Gtk.Template.Child()
     existing_journal_password = Gtk.Template.Child()
+    calendar = Gtk.Template.Child()
     first_button = Gtk.Template.Child()
     previous_button = Gtk.Template.Child()
     today_button = Gtk.Template.Child()
     next_button = Gtk.Template.Child()
     last_button = Gtk.Template.Child()
+    textview = Gtk.Template.Child()
     save_button = Gtk.Template.Child()
-    toaster = Gtk.Template.Child()
-    window_title = Gtk.Template.Child()
-    stack = Gtk.Template.Child()
-    new_open_button_box = Gtk.Template.Child()
-    new_button = Gtk.Template.Child()
-    new_page_box = Gtk.Template.Child()
-    open_page_box = Gtk.Template.Child()
-    editor_page_box = Gtk.Template.Child()
-    back_button = Gtk.Template.Child()
+
 
 
     def __init__(self, **kwargs):
@@ -75,7 +77,7 @@ class JournalWindow(Adw.ApplicationWindow):
         self.init_template()
 
         # open stack to its initial page
-        self.stack.set_visible_child(self.new_open_button_box)
+        self.stack.set_visible_child(self.new_open_page_box)
 
         self.create_actions()
 
@@ -101,17 +103,17 @@ class JournalWindow(Adw.ApplicationWindow):
     def create_actions(self):
         """Create the actions to accompany the action-names in the window.ui file."""
         # 'Back' action
-        back_action = Gio.SimpleAction.new("back_button", None)
+        back_action = Gio.SimpleAction.new("back", None)
         back_action.connect("activate", self.on_back_action)
         self.add_action(back_action)
 
         # 'New' journal action
-        new_journal_action = Gio.SimpleAction.new("new_journal", None)
+        new_journal_action = Gio.SimpleAction.new("new", None)
         new_journal_action.connect("activate", self.on_new_journal_action)
         self.add_action(new_journal_action)
 
         # 'Open' existing journal action
-        open_existing_journal_action = Gio.SimpleAction.new("open_existing_journal", None)
+        open_existing_journal_action = Gio.SimpleAction.new("open", None)
         open_existing_journal_action.connect("activate", self.on_open_existing_journal_action)
         self.add_action(open_existing_journal_action)
 
@@ -171,7 +173,7 @@ class JournalWindow(Adw.ApplicationWindow):
         """Respond to the Back button being clicked."""
         self.back_button.set_sensitive(False)
         self.back_button.set_visible(False)
-        self.stack.set_visible_child(self.new_open_button_box)
+        self.stack.set_visible_child(self.new_open_page_box)
 
 
     def on_new_journal_action(self, _, __):
@@ -239,8 +241,8 @@ class JournalWindow(Adw.ApplicationWindow):
 
 
     def on_today_action(self, _, __):
+        """Respond to request to navigate to 'today' in calendar."""
         if self.journal is not None:
-            """Respond to request to navigate to 'today' in calendar."""
             self.calendar.select_day(GLib.DateTime.new_now_local())
             self.date = self.calendar.get_date()
             self.mark_calendar_days()
@@ -345,8 +347,7 @@ class JournalWindow(Adw.ApplicationWindow):
                     modal=True,
                     heading="Save changes?",
                 )
-                file_name = os.path.basename(self.file_path)
-                dialog.set_body(f'The editor has unsaved changes. Do you want to save them?')
+                dialog.set_body('The editor has unsaved changes. Do you want to save them?')
                 dialog.add_response("discard", "Discard")
                 dialog.add_response("save", "Save")
                 dialog.set_default_response("save")
@@ -364,7 +365,7 @@ class JournalWindow(Adw.ApplicationWindow):
                     self.textview.get_buffer().set_text('')
 
 
-    def on_save_journal_dialog_response(self, dialog, response):
+    def on_save_journal_dialog_response(self, _, response):
         """Respond to request to save current-1 journal entry."""
         if self.journal is not None:
             buffer = self.textview.get_buffer()
@@ -386,7 +387,7 @@ class JournalWindow(Adw.ApplicationWindow):
             self.add_title_prefix(False)
 
 
-    def on_new_browse_for_folder_action(self, action, parameters=None):
+    def on_new_browse_for_folder_action(self, _, __):
         """Respond to request to browse to a folder for a new journal."""
         dialog = Gtk.FileDialog()
         dialog.select_folder(self, None, self.on_folder_select)
@@ -396,19 +397,19 @@ class JournalWindow(Adw.ApplicationWindow):
         """Respond to selection of folder for a new journal."""
         try:
             folder = dialog.select_folder_finish(result)
-            self.new_journal_location.set_text(folder.get_path())
-        except Gtk.DialogError:
+            self.new_journal_location.set_label(folder.get_path())
+        except GLib.Error:
             # user cancelled or backend error
             pass
 
 
-    def on_create_journal_action(self, action, parameters=None):
+    def on_create_journal_action(self, _, __):
         """Respond to request to create a new journal."""
-        location = self.new_journal_location.get_text().strip()
+        location = self.new_journal_location.get_label().strip()
         journal_name = self.new_journal_name.get_text().strip()
         password_1 = self.new_journal_password_1.get_text() # do not trim whitespace
         password_2 = self.new_journal_password_2.get_text() # do not trim whitespace
-        if location != '' and journal_name != '' and password_1 != '' and password_2 != '':
+        if location != 'Browse' and location != '' and journal_name != '' and password_1 != '' and password_2 != '':
             if password_1 != password_2:
                 self.toaster.add_toast(Adw.Toast.new("Passwords don't match"))
             else:
@@ -436,7 +437,7 @@ class JournalWindow(Adw.ApplicationWindow):
                         self.on_create_journal_dialog_complete(file_path, file)
 
 
-    def on_create_journal_dialog_response(self, dialog, response, file_path):
+    def on_create_journal_dialog_response(self, _, response, file_path):
         """Respond to prompt to overwrite existing file."""
         if response == "replace":
             # create file for writing, 'w' means to overwrite if file already exists
@@ -445,7 +446,7 @@ class JournalWindow(Adw.ApplicationWindow):
                 self.on_create_journal_dialog_complete(file_path, file)
 
 
-    def on_create_journal_dialog_complete(self, file_path, file):
+    def on_create_journal_dialog_complete(self, file_path, _):
         """Complete journal creation process by enabling widgets,
         setting subtitle and setting focus in textview."""
         self.journal = Journal(file_path, self.password)
@@ -460,7 +461,7 @@ class JournalWindow(Adw.ApplicationWindow):
         self.stack.set_visible_child(self.editor_page_box)
 
 
-    def on_open_browse_for_journal_action(self, action, parameters=None):
+    def on_open_browse_for_journal_action(self, _, __):
         """Respond to request to browse to an existing journal."""
         dialog = Gtk.FileDialog()
         dialog.open_text_file(self, None, self.on_file_select)
@@ -468,15 +469,19 @@ class JournalWindow(Adw.ApplicationWindow):
 
     def on_file_select(self, dialog, result):
         """Respond to a file being selected in Open dialog."""
-        file, encoding = dialog.open_text_file_finish(result)
-        self.existing_journal_location.set_text(file.get_path())
+        try:
+            file, _ = dialog.open_text_file_finish(result)
+            self.existing_journal_location.set_label(file.get_path())
+        except GLib.GError:
+            # user cancelled or backend error
+            pass
 
 
-    def on_open_journal_action(self, action, parameters=None):
+    def on_open_journal_action(self, _, __):
         """Respond to request to open a journal."""
-        file_path = self.existing_journal_location.get_text()
+        file_path = self.existing_journal_location.get_label()
         self.password = self.existing_journal_password.get_text()
-        if file_path != '' and self.password != '':
+        if file_path != 'Browse' and file_path != '' and self.password != '':
             try:
                 self.journal = Journal(file_path, self.password)
                 self.mark_calendar_days()
@@ -494,7 +499,7 @@ class JournalWindow(Adw.ApplicationWindow):
                 self.back_button.set_sensitive(False)
                 self.back_button.set_visible(False)
                 self.stack.set_visible_child(self.editor_page_box)
-            except InvalidToken as e:
+            except InvalidToken:
                 self.toaster.add_toast(Adw.Toast.new("'InvalidToken' error. Is the password correct?"))
 
 
@@ -508,17 +513,20 @@ class JournalWindow(Adw.ApplicationWindow):
                     self.calendar.mark_day(int(key[8:]))
 
 
-    def on_save_journal_action(self, action, parameters=None):
+    def on_save_journal_action(self, _, __):
         """Respond to request to save a journal."""
         if self.journal is not None:
             if self.textview.get_buffer().get_modified():
                 buffer = self.textview.get_buffer()
                 journal_entry = buffer.get_text(buffer.get_start_iter(), buffer.get_end_iter(), True)
-                self.journal.add_entry(self.calendar.get_date(), journal_entry)
-                self.mark_calendar_days()
-                buffer.set_modified(False)
-                self.window_title.set_title('Journal')
-                self.toaster.add_toast(Adw.Toast.new("Journal saved"))
+                if journal_entry == '' and len(list(self.journal.get_keys())) == 0:
+                    self.toaster.add_toast(Adw.Toast.new("Empty journal not saved."))
+                else:
+                    self.journal.add_entry(self.calendar.get_date(), journal_entry)
+                    self.mark_calendar_days()
+                    buffer.set_modified(False)
+                    self.window_title.set_title('Journal')
+                    self.toaster.add_toast(Adw.Toast.new("Journal saved"))
 
 
     def on_buffer_changed(self, buffer):
@@ -566,13 +574,14 @@ class Journal:
                     self.entries[key] = decrypted_value
         except FileNotFoundError:
             pass  # No existing journal file
-        self.save()
 
 
     def save(self):
         """Save all entries to file."""
+        self.prune_empty_values()
+        if len(self.get_keys()) == 0:
+            raise Exception("Empty journal not saved.")
         with open(self.file_path, 'wt', encoding='UTF-8') as file:
-            self.prune_empty_values()
             encrypted = {}
             for key, value in sorted(list(self.entries.items())):
                 encrypted_value = self.encrypt(value, self.password)
