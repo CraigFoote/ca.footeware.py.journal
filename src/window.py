@@ -310,29 +310,65 @@ class JournalWindow(Adw.ApplicationWindow):
     def on_prev_month(self, calendar):
         """Respond to pressing of Previous Month button."""
         if self.journal is not None:
-            self.date = calendar.get_date()
             self.mark_calendar_days()
+            self.date = calendar.get_date()
+            selected_date_str = self.date.format('%Y-%m-%d')
+            buffer = self.textview.get_buffer()
+            if selected_date_str in self.journal.get_keys():
+                journal_entry = self.journal.get_entry(selected_date_str)
+                buffer.set_text(journal_entry)
+            else:
+                buffer.set_text('')
+            buffer.set_modified(False)
+            self.add_title_prefix(False)
 
 
     def on_next_month(self, calendar):
         """Respond to pressing of Next Month button."""
         if self.journal is not None:
-            self.date = calendar.get_date()
             self.mark_calendar_days()
+            self.date = calendar.get_date()
+            selected_date_str = self.date.format('%Y-%m-%d')
+            buffer = self.textview.get_buffer()
+            if selected_date_str in self.journal.get_keys():
+                journal_entry = self.journal.get_entry(selected_date_str)
+                buffer.set_text(journal_entry)
+            else:
+                buffer.set_text('')
+            buffer.set_modified(False)
+            self.add_title_prefix(False)
 
 
     def on_prev_year(self, calendar):
         """Respond to pressing of Previous Year button."""
         if self.journal is not None:
-            self.date = calendar.get_date()
             self.mark_calendar_days()
+            self.date = calendar.get_date()
+            selected_date_str = self.date.format('%Y-%m-%d')
+            buffer = self.textview.get_buffer()
+            if selected_date_str in self.journal.get_keys():
+                journal_entry = self.journal.get_entry(selected_date_str)
+                buffer.set_text(journal_entry)
+            else:
+                buffer.set_text('')
+            buffer.set_modified(False)
+            self.add_title_prefix(False)
 
 
     def on_next_year(self, calendar):
         """Respond to pressing of Next Year button."""
         if self.journal is not None:
-            self.date = calendar.get_date()
             self.mark_calendar_days()
+            self.date = calendar.get_date()
+            selected_date_str = self.date.format('%Y-%m-%d')
+            buffer = self.textview.get_buffer()
+            if selected_date_str in self.journal.get_keys():
+                journal_entry = self.journal.get_entry(selected_date_str)
+                buffer.set_text(journal_entry)
+            else:
+                buffer.set_text('')
+            buffer.set_modified(False)
+            self.add_title_prefix(False)
 
 
     def on_day_selected(self, calendar):
@@ -377,9 +413,10 @@ class JournalWindow(Adw.ApplicationWindow):
                 self.journal.add_entry(self.old_date, journal_entry) # saves
                 self.mark_calendar_days()
                 self.toaster.add_toast(Adw.Toast.new("Journal saved"))
-            date_str = self.calendar.get_date()
-            if date_str in self.journal.get_keys():
-                journal_entry = self.journal.get_entry(date_str)
+            selected_date = self.calendar.get_date()
+            selected_date_str = selected_date.format('%Y-%m-%d')
+            if selected_date_str in self.journal.get_keys():
+                journal_entry = self.journal.get_entry(selected_date_str)
                 buffer.set_text(journal_entry)
             else:
                 buffer.set_text('')
