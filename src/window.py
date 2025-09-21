@@ -68,7 +68,6 @@ class JournalWindow(Adw.ApplicationWindow):
     save_button = Gtk.Template.Child()
 
 
-
     def __init__(self, **kwargs):
         """Initialize this Journal instance."""
         super().__init__(**kwargs)
@@ -91,6 +90,9 @@ class JournalWindow(Adw.ApplicationWindow):
         # textview
         self.buffer = self.textview.get_buffer()
         self.buffer.connect("changed", self.on_buffer_changed)
+
+        # Connect to close-request signal to handle window closing
+        self.connect("close-request", self.on_close_request)
 
         self.journal = None
         self.date = self.calendar.get_date()
@@ -589,6 +591,73 @@ class JournalWindow(Adw.ApplicationWindow):
                 self.window_title.set_title(f'• {title_str}')
         else:
             self.window_title.set_title('Journal')
+
+
+    def has_unsaved_changes(self):
+        """Check if this window has unsaved changes."""
+        if self.journal is not None:
+            return self.window_title.get_title().startswith("• ")
+        return False
+
+
+    def save_current_entry(self):
+        """Save the current journal entry."""
+        if self.journal is not None and self.textview.get_buffer().get_modified():
+            buffer = self.textview.get_buffer()
+            start_iter = buffer.get_start_iter()
+            end_iter = buffer.get_end_iter()
+            journal_entry = buffer.get_text(start_iter, end_iter, True)
+            self.journal.add_entry(self.date, journal_entry)
+            buffer.set_modified(False)
+            self.window_title.set_title('Journal')
+
+
+    def on_close_request(self, window):
+        """Handle window close request - check for unsaved changes."""
+        if self.journal is not None and self.window_title.get_title().startswith("• "):
+            # There are unsaved changes
+            dialog = Adw.MessageDialog(
+                transient_for=self,
+                modal=True,
+                heading="Save changes?",
+            )
+            dialog.set_body('The editor has unsaved changes. Do you want to save them before closing?')
+            dialog.add_response("discard", "Discard")
+            dialog.add_response("cancel", "Cancel")
+            dialog.add_response("save", "Save")
+            dialog.set_default_response("save")
+            dialog.set_close_response("cancel")
+            dialog.set_response_appearance("discard", Adw.ResponseAppearance.DESTRUCTIVE)
+            dialog.set_response_appearance("save", Adw.ResponseAppearance.SUGGESTED)
+            dialog.connect("response", self.on_close_dialog_response)
+            dialog.show()
+            return True  # Prevent close until user decides
+        return False  # Allow close
+
+
+    def on_close_dialog_response(self, dialog, response):
+        """Handle response from close confirmation dialog."""
+        if response == "save":
+            # Save and close
+            if self.journal is not None:
+                buffer = self.textview.get_buffer()
+                start_iter = buffer.get_start_iter()
+                end_iter = buffer.get_end_iter()
+                journal_entry = buffer.get_text(start_iter, end_iter, True)
+                self.journal.add_entry(self.date, journal_entry)
+            self.force_close()
+        elif response == "discard":
+            # Close without saving
+            self.force_close()
+        # If "cancel", do nothing - dialog closes and window stays open
+
+
+    def force_close(self):
+        """Force close the window by temporarily disconnecting the close-request handler."""
+        # Disconnect the close-request handler to avoid recursion
+        self.disconnect_by_func(self.on_close_request)
+        # Now close the window
+        self.close()
 
 
 class Journal:

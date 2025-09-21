@@ -38,7 +38,7 @@ class JournalApplication(Adw.Application):
                          flags=Gio.ApplicationFlags.DEFAULT_FLAGS,
                          resource_base_path='/ca/footeware/py/journal')
         self.version = version
-        self.create_action('quit', lambda *_: self.quit(), ['<primary>q'])
+        self.create_action('quit', self.on_quit, ['<primary>q'])
         self.create_action('about', self.on_about_action)
 
 
@@ -83,6 +83,16 @@ class JournalApplication(Adw.Application):
         self.add_action(action)
         if shortcuts:
             self.set_accels_for_action(f"app.{name}", shortcuts)
+
+
+    def on_quit(self, _, __):
+        """Handle quit action by trying to close the active window."""
+        win = self.props.active_window
+        if win:
+            # Let the window handle the close request
+            win.close()
+        else:
+            self.quit()
 
 
 def main(version):
