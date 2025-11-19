@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <!-- Created with Cambalache 0.96.1 -->
 <interface>
   <!-- interface-name window.ui -->
@@ -123,8 +123,8 @@
                                     <child>
                                       <object class="AdwActionRow">
                                         <property name="accessible-role">row</property>
-                                        <property name="activatable">True</property>
                                         <property name="action-name">win.new_browse_for_folder</property>
+                                        <property name="activatable">True</property>
                                         <property name="hexpand">True</property>
                                         <property name="title">Journal location</property>
                                         <property name="valign">center</property>
@@ -142,12 +142,6 @@
                                             <property name="margin-top">10</property>
                                           </object>
                                         </child>
-                                      </object>
-                                    </child>
-                                    <child>
-                                      <object class="AdwEntryRow" id="new_journal_name">
-                                        <property name="input-hints">spellcheck</property>
-                                        <property name="title">New journal name</property>
                                       </object>
                                     </child>
                                     <child>
@@ -179,6 +173,7 @@
                                 </child>
                               </object>
                             </property>
+                            <property name="maximum-size">800</property>
                           </object>
                         </property>
                       </object>
@@ -211,8 +206,8 @@
                                     <child>
                                       <object class="AdwActionRow">
                                         <property name="accessible-role">row</property>
-                                        <property name="activatable">True</property>
                                         <property name="action-name">win.open_browse_for_journal</property>
+                                        <property name="activatable">True</property>
                                         <property name="hexpand">True</property>
                                         <property name="title">Journal location</property>
                                         <property name="valign">center</property>
@@ -256,6 +251,7 @@
                                 </child>
                               </object>
                             </property>
+                            <property name="maximum-size">800</property>
                           </object>
                         </property>
                       </object>
@@ -368,4 +364,3 @@
     </section>
   </menu>
 </interface>
-

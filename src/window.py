@@ -53,7 +53,6 @@ class JournalWindow(Adw.ApplicationWindow):
     open_page_box = Gtk.Template.Child()
     editor_page_box = Gtk.Template.Child()
     new_journal_location = Gtk.Template.Child()
-    new_journal_name = Gtk.Template.Child()
     new_journal_password_1 = Gtk.Template.Child()
     new_journal_password_2 = Gtk.Template.Child()
     existing_journal_location = Gtk.Template.Child()
@@ -429,14 +428,15 @@ class JournalWindow(Adw.ApplicationWindow):
     def on_new_browse_for_folder_action(self, _, __):
         """Respond to request to browse to a folder for a new journal."""
         dialog = Gtk.FileDialog()
-        dialog.select_folder(self, None, self.on_folder_select)
+        dialog.save(self, None, self.on_new_file_select)
 
 
-    def on_folder_select(self, dialog, result):
+    def on_new_file_select(self, dialog, result):
         """Respond to selection of folder for a new journal."""
         try:
-            folder = dialog.select_folder_finish(result)
-            self.new_journal_location.set_label(folder.get_path())
+            file = dialog.save_finish(result)
+            self.new_journal_location.set_label(file.get_path())
+            self.new_journal_password_1.grab_focus()
         except GLib.Error:
             # user cancelled or backend error
             pass
@@ -445,45 +445,17 @@ class JournalWindow(Adw.ApplicationWindow):
     def on_create_journal_action(self, _, __):
         """Respond to request to create a new journal."""
         location = self.new_journal_location.get_label().strip()
-        journal_name = self.new_journal_name.get_text().strip()
         password_1 = self.new_journal_password_1.get_text() # do not trim whitespace
         password_2 = self.new_journal_password_2.get_text() # do not trim whitespace
-        if location != 'Browse' and location != '' and journal_name != '' and password_1 != '' and password_2 != '':
+        if location != 'Browse' and location != '' and password_1 != '' and password_2 != '':
             if password_1 != password_2:
                 self.toaster.add_toast(Adw.Toast.new("Passwords don't match"))
             else:
-                file_path = os.path.join(location, journal_name)
                 self.password = password_1
-                if os.path.isfile(file_path):
-                    dialog = Adw.MessageDialog(
-                        transient_for=self,
-                        modal=True,
-                        heading="Replace file?",
-                    )
-                    file_name = os.path.basename(file_path)
-                    dialog.set_body(f'A file named {file_name} already exists. Do you want to replace it?')
-                    dialog.add_response("cancel", "Cancel")
-                    dialog.add_response("replace", "Replace")
-                    dialog.set_default_response("cancel")
-                    dialog.set_close_response("cancel")
-                    dialog.set_response_appearance("replace", Adw.ResponseAppearance.DESTRUCTIVE)
-                    dialog.connect("response", self.on_create_journal_dialog_response, file_path)
-                    dialog.show()
-                else:
-                    # create file for writing, 'x' means to fail if file already exists - a failsafe
-                    with open(file_path, 'xt', encoding='UTF-8') as file:
-                        self.file_path = file_path
-                        self.on_create_journal_dialog_complete(file_path, file)
-
-
-    def on_create_journal_dialog_response(self, _, response, file_path):
-        """Respond to prompt to overwrite existing file."""
-        if response == "replace":
-            # create file for writing, 'w' means to overwrite if file already exists
-            with open(file_path, 'wt', encoding='UTF-8') as file:
-                self.file_path = file_path
-                self.on_create_journal_dialog_complete(file_path, file)
-
+                # create file for writing
+                with open(location, 'w', encoding='UTF-8') as file:
+                    self.file_path = location
+                    self.on_create_journal_dialog_complete(location, file)
 
     def on_create_journal_dialog_complete(self, file_path, _):
         """Complete journal creation process by enabling widgets,
@@ -503,14 +475,15 @@ class JournalWindow(Adw.ApplicationWindow):
     def on_open_browse_for_journal_action(self, _, __):
         """Respond to request to browse to an existing journal."""
         dialog = Gtk.FileDialog()
-        dialog.open_text_file(self, None, self.on_file_select)
+        dialog.open_text_file(self, None, self.on_open_file_select)
 
 
-    def on_file_select(self, dialog, result):
+    def on_open_file_select(self, dialog, result):
         """Respond to a file being selected in Open dialog."""
         try:
             file, _ = dialog.open_text_file_finish(result)
             self.existing_journal_location.set_label(file.get_path())
+            self.existing_journal_password.grab_focus()
         except GLib.GError:
             # user cancelled or backend error
             pass
