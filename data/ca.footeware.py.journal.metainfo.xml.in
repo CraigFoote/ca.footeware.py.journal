@@ -35,30 +35,75 @@
 
   <screenshots>
     <screenshot type="default">
+      <image>https://github.com/CraigFoote/ca.footeware.py.journal/blob/master/data/screenshot4.png?raw=true</image>
+      <caption>Journal editor window</caption>
+    </screenshot>
+    <screenshot>
       <image>https://github.com/CraigFoote/ca.footeware.py.journal/blob/master/data/screenshot1.png?raw=true</image>
       <caption>Initial Journal window</caption>
     </screenshot>
-    <screenshot type="default">
+    <screenshot>
       <image>https://github.com/CraigFoote/ca.footeware.py.journal/blob/master/data/screenshot2.png?raw=true</image>
       <caption>New Journal window</caption>
     </screenshot>
-    <screenshot type="default">
+    <screenshot>
       <image>https://github.com/CraigFoote/ca.footeware.py.journal/blob/master/data/screenshot3.png?raw=true</image>
       <caption>Open Journal window</caption>
-    </screenshot>
-    <screenshot type="default">
-      <image>https://github.com/CraigFoote/ca.footeware.py.journal/blob/master/data/screenshot4.png?raw=true</image>
-      <caption>Journal editor window</caption>
     </screenshot>
   </screenshots>
 
   <releases>
     <release version="1.5.0" date="2025-09-14">
-      <url type="details">https://github.com/CraigFoote/ca.footeware.py.journal/releases</url>
+      <url type="details">https://github.com/CraigFoote/ca.footeware.py.journal/releases/tag/1.5.0</url>
       <description translate="no">
         <p>Redesign with GtkStack.</p>
         <ul>
-          <li>Creation of a new or opening an existing journal now done with dedicated pages, not cluttering up the editor.</li>
+          <li>Creation of a new, or opening an existing journal now done with dedicated pages, not cluttering up the editor.</li>
+        </ul>
+      </description>
+    </release>
+    <release version="1.6.0" date="2025-09-18">
+      <url type="details">https://github.com/CraigFoote/ca.footeware.py.journal/releases/tag/1.6.0</url>
+      <description translate="no">
+        <p>adw actionbars</p>
+        <ul>
+          <li>Use adw actionbars for new and open forms.</li>
+        </ul>
+      </description>
+    </release>
+    <release version="1.7.0" date="2025-09-19">
+      <url type="details">https://github.com/CraigFoote/ca.footeware.py.journal/releases/tag/1.7.0</url>
+      <description translate="no">
+        <p>shortcut dialog</p>
+        <ul>
+          <li>Bugfixes and shortcut dialog addition.</li>
+        </ul>
+      </description>
+    </release>
+    <release version="1.8.0" date="2025-09-21">
+      <url type="details">https://github.com/CraigFoote/ca.footeware.py.journal/releases/tag/1.8.0</url>
+      <description translate="no">
+        <p>Prompt on close</p>
+        <ul>
+          <li>Prompt upon window close if editor is dirty.</li>
+        </ul>
+      </description>
+    </release>
+    <release version="1.9.0" date="2025-11-03">
+      <url type="details">https://github.com/CraigFoote/ca.footeware.py.journal/releases/tag/1.9.0</url>
+      <description translate="no">
+        <p>Browse AdwActionButtons activatable</p>
+        <ul>
+          <li>Made browse AdwActionButtons activatable without clicking button.</li>
+        </ul>
+      </description>
+    </release>
+    <release version="1.10.0" date="2025-11-19">
+      <url type="details">https://github.com/CraigFoote/ca.footeware.py.journal/releases/tag/1.10.0</url>
+      <description translate="no">
+        <p>Combined form fields</p>
+        <ul>
+          <li>Combined New journal location and name fields.</li>
         </ul>
       </description>
     </release>
